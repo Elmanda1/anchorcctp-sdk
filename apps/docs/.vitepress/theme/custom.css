@@ -47,13 +47,60 @@
   border-radius: 12px;
 }
 
-/* Layout: narrower sidebar, content pulled left */
+/* Layout: narrower sidebar, content centered (like Flutter docs catalog) */
 :root {
   --vp-sidebar-width: 232px;
 }
+.VPDoc .container {
+  margin: 0 auto;
+}
+.VPDoc .content {
+  margin: 0 auto;
+}
+.VPDoc .content-container {
+  margin: 0 auto;
+}
 @media (min-width: 960px) {
-  .VPDoc.has-aside .content-container {
-    max-width: 760px;
+  .VPDoc .container {
+    justify-content: center;
+  }
+  .VPDoc .content {
+    display: flex;
+    justify-content: center;
+  }
+  .VPDoc.has-aside .content-container,
+  .VPDoc:not(.has-aside) .content-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+}
+
+/* Prev / Next pager: arrow affordance (← back, next →) */
+.VPDocFooter .pager-link {
+  position: relative;
+}
+.VPDocFooter .pager-link.prev .title::before {
+  content: '\2190';
+  display: inline-block;
+  margin-right: 6px;
+  transition: transform 0.2s ease;
+}
+.VPDocFooter .pager-link.next .title::after {
+  content: '\2192';
+  display: inline-block;
+  margin-left: 6px;
+  transition: transform 0.2s ease;
+}
+.VPDocFooter .pager-link.prev:hover .title::before {
+  transform: translateX(-3px);
+}
+.VPDocFooter .pager-link.next:hover .title::after {
+  transform: translateX(3px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .VPDocFooter .pager-link.prev .title::before,
+  .VPDocFooter .pager-link.next .title::after {
+    transition: none;
   }
 }
 

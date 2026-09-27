@@ -1,14 +1,23 @@
 import { defineConfig } from 'vitepress';
 
 export default defineConfig({
-  title: 'AnchorCCTP',
+  title: 'AnchorCCTP Docs',
+  titleTemplate: ':title — AnchorCCTP Docs',
   description: 'Accept USDC from any CCTP-connected chain on Stellar with a single function call.',
   base: '/docs/',
   appearance: 'dark',
   cleanUrls: true,
+  head: [
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/docs/assets/img/final.svg' }],
+    ['meta', { name: 'theme-color', content: '#070C18' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:site_name', content: 'AnchorCCTP Docs' }],
+    ['meta', { property: 'og:title', content: 'AnchorCCTP Docs' }],
+    ['meta', { property: 'og:description', content: 'Accept USDC from any CCTP-connected chain on Stellar with a single function call.' }],
+  ],
   themeConfig: {
     logo: '/assets/img/final.svg',
-    siteTitle: 'AnchorCCTP',
+    siteTitle: 'AnchorCCTP Docs',
     socialLinks: [{ icon: 'github', link: 'https://github.com/Dyjuen/anchorcctp-sdk' }],
     search: { provider: 'local' },
     nav: [

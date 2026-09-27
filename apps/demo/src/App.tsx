@@ -42,7 +42,7 @@ export function App() {
   const scrollToDocs = () => {
     const url =
       (import.meta as unknown as { env?: Record<string, string | undefined> }).env?.VITE_DOCS_URL ??
-      '/docs/overview/what';
+      '/docs/';
     window.open(url, '_blank', 'noreferrer');
   };
 
