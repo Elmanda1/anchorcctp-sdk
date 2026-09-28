@@ -47,31 +47,25 @@
   border-radius: 12px;
 }
 
-/* Layout: narrower sidebar, content centered (like Flutter docs catalog) */
+/* Layout: narrower sidebar, content centered (like Flutter docs catalog).
+   Centering is applied to .content-container INSIDE .content so the right
+   "On this page" aside keeps its own fixed column and never overlaps. */
 :root {
   --vp-sidebar-width: 232px;
 }
-.VPDoc .container {
-  margin: 0 auto;
-}
-.VPDoc .content {
-  margin: 0 auto;
-}
-.VPDoc .content-container {
-  margin: 0 auto;
-}
 @media (min-width: 960px) {
-  .VPDoc .container {
-    justify-content: center;
-  }
-  .VPDoc .content {
-    display: flex;
-    justify-content: center;
-  }
   .VPDoc.has-aside .content-container,
   .VPDoc:not(.has-aside) .content-container {
     max-width: 800px;
     margin: 0 auto;
+  }
+}
+
+/* Aside ("On this page") keeps default VitePress column geometry */
+@media (min-width: 1280px) {
+  .VPDoc .aside {
+    order: 2;
+    flex-shrink: 0;
   }
 }
 

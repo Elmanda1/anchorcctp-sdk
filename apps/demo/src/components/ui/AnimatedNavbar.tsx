@@ -17,7 +17,7 @@ interface AnimatedNavProps {
 
 const navItems = [
   { name: "Home", href: "#hero", id: "hero" },
-  { name: "Catalog", href: "#catalog", id: "catalog" },
+  { name: "How to use", href: "#catalog", id: "catalog" },
   { name: "How It Works", href: "#features", id: "features" },
   { name: "FAQ", href: "#faq", id: "faq" },
 ];
