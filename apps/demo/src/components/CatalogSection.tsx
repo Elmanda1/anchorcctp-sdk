@@ -6,10 +6,6 @@ import {
   CheckCircle2,
   AlertCircle,
   RefreshCw,
-  Coins,
-  Shield,
-  Layers,
-  Sparkles,
   Wifi,
   WifiOff,
 } from 'lucide-react';
@@ -81,6 +77,8 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
   const [usdcBalance, setUsdcBalance] = useState<string | null>(null);
   const [networkOk, setNetworkOk] = useState<boolean | null>(null);
   const [networkLabel, setNetworkLabel] = useState<string>('');
+  /** Raw loader message when the env config is invalid — rendered as an actionable hint. */
+  const [networkError, setNetworkError] = useState<string | null>(null);
 
   /** The transfer the poller is driving. Kept through `cancelled` so retry can resume it. */
   const runRef = useRef<TransferRun | null>(null);
@@ -99,7 +97,9 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
 
   const domainsList = Object.values(CCTP_DOMAINS);
   const filteredDomains = domainsList.filter((d) => {
-    if (selectedCategory === 'evm') return d.domainId !== 5 && d.domainId !== 27;
+    // Stellar (27) is always the destination — never a source.
+    if (d.domainId === 27) return false;
+    if (selectedCategory === 'evm') return d.domainId !== 5;
     if (selectedCategory === 'svm') return d.domainId === 5;
     if (selectedCategory === 'cosmos') return d.domainId === 21;
     return true;
@@ -154,9 +154,11 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
       const config = loadNetworkConfig();
       setNetworkOk(true);
       setNetworkLabel(config.passphrase);
-    } catch {
+      setNetworkError(null);
+    } catch (err) {
       setNetworkOk(false);
       setNetworkLabel('Config error');
+      setNetworkError(err instanceof Error ? err.message : 'Unknown config error');
     }
   };
 
@@ -169,6 +171,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
       setUsdcBalance(null);
       setNetworkOk(null);
       setNetworkLabel('');
+      setNetworkError(null);
     }
   }, [wallet.connected, wallet.address]);
 
@@ -498,189 +501,216 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
   const fastUnavailable = quote !== undefined && !quote.fastTierAvailable;
 
   return (
-    <section id="catalog" className="py-16 relative bg-white dark:bg-[#070C18] border-t border-slate-200 dark:border-slate-800 w-full overflow-hidden">
-      <div className="w-full max-w-[1700px] mx-auto px-6 sm:px-10 lg:px-16 space-y-10">
-        {/* Header Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-200 dark:border-slate-800 pb-6 w-full"
-        >
-          <div className="space-y-2 text-left">
-            <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight sm:text-4xl">
-              Select Source Domain
-            </h2>
-            <p className="text-slate-500 max-w-xl text-sm font-medium">
-              Transfer 1:1 USDC from 26+ connected blockchains directly to your Stellar account.
+    <section id="catalog" className="py-20 lg:py-28 relative bg-[#070C18] border-t border-slate-800 w-full overflow-hidden">
+      <div className="w-full max-w-[1700px] mx-auto px-6 sm:px-10 lg:px-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-start">
+
+          {/* Left: oversized editorial headline, mirroring the reference layout */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-50px' }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+            className="lg:col-span-3 space-y-5 lg:sticky lg:top-32"
+          >
+            <p className="font-mono text-xs font-bold uppercase tracking-[0.3em] text-[#3E6BFF]">
+              How to use
             </p>
-          </div>
-        </motion.div>
-
-        {/* Category Filters Pill Bar */}
-        <div className="flex items-center space-x-2.5 overflow-x-auto pb-2 w-full">
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
-                selectedCategory === cat.id
-                  ? 'bg-[#3E6BFF] text-white shadow-lg shadow-blue-500/25 ring-2 ring-blue-400/50'
-                  : 'bg-slate-900/80 text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Main Catalog Grid Layout */}
-        <div className="grid grid-cols-12 gap-6 lg:gap-8 items-start w-full">
-          {/* Left Column: Domain Slots Grid */}
-          <motion.div layout className="col-span-7 grid grid-cols-2 gap-4 w-full">
-            <AnimatePresence mode="popLayout">
-            {filteredDomains.slice(0, 6).map((domain) => {
-              const isSelected = selectedDomainId === domain.domainId;
-              const isEvm = domain.networkType.toLowerCase().includes('evm');
-              const isSvm = domain.domainId === 5;
-              const isCosmos = domain.domainId === 21;
-
-              return (
-                <motion.div
-                  layout
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                  key={domain.domainId}
-                  whileHover={{ y: -4 }}
-                  onClick={() => setSelectedDomainId(domain.domainId)}
-                  className={`p-5 rounded-2xl cursor-pointer transition-all border group relative overflow-hidden ${
-                    isSelected
-                      ? 'bg-slate-900/95 border-blue-500 shadow-[0_10px_30px_-10px_rgba(62,107,255,0.35)] ring-2 ring-blue-500/50'
-                      : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 hover:bg-slate-900/90'
-                  }`}
-                >
-                  {isSelected && (
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-600" />
-                  )}
-
-                  <div className="flex items-start justify-between">
-                    <div className="w-11 h-11 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center p-2.5 shadow-sm group-hover:scale-105 transition-transform">
-                      <img src={getDomainLogo(domain.domainId)} alt={domain.name} className="w-full h-full object-contain" />
-                    </div>
-                    <span
-                      className={`text-[10px] font-mono px-2.5 py-1 rounded-full font-bold border ${
-                        isSvm
-                          ? 'bg-purple-500/10 text-purple-400 border-purple-500/30'
-                          : isCosmos
-                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                          : 'bg-blue-500/10 text-blue-400 border-blue-500/30'
-                      }`}
-                    >
-                      {domain.networkType}
-                    </span>
-                  </div>
-
-                  <div className="mt-4 space-y-1">
-                    <div className="flex items-center space-x-2">
-                      <h3 className="text-base font-extrabold text-white transition-colors group-hover:text-blue-400">
-                        {domain.name}
-                      </h3>
-                      <span className="text-[10px] font-mono text-slate-500">ID: {domain.domainId}</span>
-                    </div>
-                    <p className="text-xs text-slate-400 font-medium">
-                      Circle CCTP v1 Standard Protocol
-                    </p>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-bold">
-                    <span className="text-slate-400">Deposit Ratio</span>
-                    <span className="text-emerald-400 font-mono">1 USDC = 1 USDC</span>
-                  </div>
-                </motion.div>
-              );
-            })}
-            </AnimatePresence>
+            <h2 className="text-5xl xl:text-6xl font-black text-white tracking-tighter leading-[0.95]">
+              Not sure where to start? here&apos;s how!
+            </h2>
+            <p className="text-slate-400 text-base font-medium leading-relaxed max-w-xs">
+              Pick a domain, burn, then watch USDC land on Stellar. Transfer 1:1 USDC from 26+ chains straight to your Stellar account.
+            </p>
+            <div className="flex items-center gap-2 pt-2">
+              {wallet.connected ? (
+                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-extrabold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                  <Wifi className="w-3 h-3 mr-1.5" />
+                  {networkLabel || 'Connected'} ✓
+                </span>
+              ) : (
+                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-extrabold bg-slate-800/80 border border-slate-700 text-slate-300">
+                  <WifiOff className="w-3 h-3 mr-1.5" />
+                  Wallet not connected
+                </span>
+              )}
+              {wallet.connected && (xlmBalance !== null || usdcBalance !== null) && (
+                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-mono font-bold bg-slate-800/80 border border-slate-700 text-slate-200">
+                  {usdcBalance ?? '…'} USDC · {xlmBalance ?? '…'} XLM
+                </span>
+              )}
+            </div>
+            {networkOk === false && (
+              <p className="text-xs font-bold text-rose-400">{networkLabel}</p>
+            )}
           </motion.div>
 
-          {/* Right Column: Featured Interactive Deposit Card */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
-            className="col-span-5 p-6 sm:p-8 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-6 shadow-xl w-full backdrop-blur-md relative overflow-hidden"
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
+          {/* Right: three tilted cards joined by a connector line, like the reference */}
+          <div className="lg:col-span-9 relative">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-5 items-stretch relative z-10">
 
-            <div className="space-y-6 relative z-10">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center p-2.5 shadow-md">
+              {/* Card 1 — Pick domain */}
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{ duration: 0.55, ease: 'easeOut' }}
+                className="rounded-3xl bg-[#0D1527] border border-slate-800 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.7)] p-6 flex flex-col gap-5 md:-rotate-2 hover:rotate-0 transition-transform duration-500"
+              >
+                <div>
+                  <h3 className="text-2xl font-extrabold text-white tracking-tight">Pick a domain</h3>
+                  <p className="text-slate-400 text-sm font-medium mt-1 leading-relaxed">
+                    Check the source chain before burning.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5">
+                  {categories.map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
+                        selectedCategory === cat.id
+                          ? 'bg-[#3E6BFF] text-white shadow-lg shadow-blue-500/25'
+                          : 'bg-slate-900/80 text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700'
+                      }`}
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+
+                <p className="text-[11px] font-mono text-slate-500 -mt-3">
+                  {filteredDomains.length} source chains available — scroll for more
+                </p>
+
+                <div className="rounded-2xl bg-slate-950/60 border border-slate-800/80 p-3 space-y-2 max-h-[420px] overflow-y-auto pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-700 [&::-webkit-scrollbar-thumb]:rounded-full">
+                  <AnimatePresence mode="popLayout">
+                    {filteredDomains.map((domain) => {
+                      const isSelected = selectedDomainId === domain.domainId;
+                      const isSvm = domain.domainId === 5;
+                      const isCosmos = domain.domainId === 21;
+                      return (
+                        <motion.button
+                          layout
+                          initial={{ opacity: 0, scale: 0.97 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.97 }}
+                          key={domain.domainId}
+                          onClick={() => setSelectedDomainId(domain.domainId)}
+                          className={`w-full flex items-center gap-3 p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                            isSelected
+                              ? 'bg-slate-900 border-[#3E6BFF]/70 shadow-md'
+                              : 'bg-transparent border-transparent hover:border-slate-700 hover:bg-slate-900/70'
+                          }`}
+                        >
+                          <span className="w-9 h-9 shrink-0 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center p-1.5">
+                            <img src={getDomainLogo(domain.domainId)} alt={domain.name} className="w-full h-full object-contain" />
+                          </span>
+                          <span className="flex-1 min-w-0">
+                            <span className="flex items-center gap-2">
+                              <span className="block text-sm font-extrabold text-white truncate">{domain.name}</span>
+                              <span
+                                className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full font-bold border shrink-0 ${
+                                  isSvm
+                                    ? 'bg-purple-500/10 text-purple-400 border-purple-500/30'
+                                    : isCosmos
+                                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                                    : 'bg-blue-500/10 text-blue-400 border-blue-500/30'
+                                }`}
+                              >
+                                {domain.networkType}
+                              </span>
+                            </span>
+                            <span className="block text-[11px] font-mono text-slate-500">ID: {domain.domainId} · CCTP v1 Standard</span>
+                          </span>
+                          <span className={`w-5 h-5 shrink-0 rounded-md border flex items-center justify-center text-[12px] font-black ${
+                            isSelected ? 'bg-[#3E6BFF] border-[#3E6BFF] text-white' : 'border-slate-700 text-transparent'
+                          }`}>
+                            ✓
+                          </span>
+                        </motion.button>
+                      );
+                    })}
+                  </AnimatePresence>
+                </div>
+
+                <div className="mt-auto pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs font-bold">
+                  <span className="text-slate-400">Deposit Ratio</span>
+                  <span className="text-emerald-400 font-mono">1 USDC = 1 USDC</span>
+                </div>
+              </motion.div>
+
+              {/* Card 2 — Burn pakai form */}
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{ duration: 0.55, ease: 'easeOut', delay: 0.1 }}
+                className="rounded-3xl bg-[#0D1527] border border-slate-800 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.7)] p-6 flex flex-col gap-4 md:rotate-1 hover:rotate-0 transition-transform duration-500"
+              >
+                <div>
+                  <h3 className="text-2xl font-extrabold text-white tracking-tight">Burn & send</h3>
+                  <p className="text-slate-400 text-sm font-medium mt-1 leading-relaxed">
+                    {activeDomain.name} → Stellar ({STELLAR_CCTP_DOMAIN}) · fill in the burn hash, then execute.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3 rounded-2xl bg-slate-950/60 border border-slate-800/80 p-3">
+                  <span className="w-10 h-10 shrink-0 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center p-2">
                     <img src={getDomainLogo(activeDomain.domainId)} alt={activeDomain.name} className="w-full h-full object-contain" />
+                  </span>
+                  <span className="flex-1 min-w-0">
+                    <span className="block text-sm font-extrabold text-white truncate">{activeDomain.name}</span>
+                    <span className="block text-[11px] font-mono text-blue-400 font-bold">Circle Domain ID: {activeDomain.domainId}</span>
+                  </span>
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#3E6BFF] text-white shadow-md shrink-0">
+                    Selected
+                  </span>
+                </div>
+
+                <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-950/60 p-4 space-y-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      Amount (USDC)
+                    </label>
+                    <input
+                      type="number"
+                      value={usdcAmount}
+                      onChange={(e) => setUsdcAmount(e.target.value)}
+                      disabled={inputsDisabled}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-extrabold text-white focus:ring-2 focus:ring-[#3E6BFF] focus:border-[#3E6BFF] outline-none transition-all font-mono"
+                    />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-extrabold text-white">{activeDomain.name}</h3>
-                    <p className="text-xs text-blue-400 font-mono font-bold">Circle Domain ID: {activeDomain.domainId}</p>
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      Burn Tx Hash
+                    </label>
+                    <input
+                      type="text"
+                      value={burnTxHash}
+                      onChange={(e) => setBurnTxHash(e.target.value)}
+                      disabled={inputsDisabled}
+                      placeholder="0x…"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-300 focus:ring-2 focus:ring-[#3E6BFF] outline-none transition-all truncate"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      Stellar destination
+                    </label>
+                    <input
+                      type="text"
+                      readOnly
+                      value={wallet.connected && wallet.address ? wallet.address : 'Connect Freighter Wallet…'}
+                      className="w-full bg-slate-950/60 border border-slate-800/80 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-500 cursor-not-allowed truncate"
+                    />
                   </div>
                 </div>
-                <span className="px-3.5 py-1 rounded-full text-xs font-extrabold bg-[#3E6BFF] text-white shadow-md">
-                  Selected Domain
-                </span>
-              </div>
 
-              {/* Input Form Parameters */}
-              <div className="space-y-4 text-left">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                    Deposit Amount (USDC)
-                  </label>
-                  <input
-                    type="number"
-                    value={usdcAmount}
-                    onChange={(e) => setUsdcAmount(e.target.value)}
-                    disabled={inputsDisabled}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm font-extrabold text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-mono"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                    Burn Transaction Hash (Source)
-                  </label>
-                  <input
-                    type="text"
-                    value={burnTxHash}
-                    onChange={(e) => setBurnTxHash(e.target.value)}
-                    disabled={inputsDisabled}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs font-mono text-slate-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all truncate"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                    Stellar Destination Account
-                  </label>
-                  <input
-                    type="text"
-                    readOnly
-                    value={
-                      wallet.connected && wallet.address
-                        ? wallet.address
-                        : 'Connect Freighter Wallet...'
-                    }
-                    className="w-full bg-slate-950/60 border border-slate-800/80 rounded-xl px-4 py-3 text-xs font-mono text-slate-500 cursor-not-allowed"
-                  />
-                </div>
-              </div>
-
-              {/* Balance + Network Badge */}
-              {wallet.connected && wallet.address && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-slate-950/60 rounded-xl border border-slate-800">
-                    <div className="flex items-center space-x-4 text-xs font-mono">
+                {wallet.connected && wallet.address && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 text-[11px] font-mono">
                       <span className="text-slate-400">
                         XLM <span className="text-white font-bold">{xlmBalance ?? '…'}</span>
                       </span>
@@ -688,305 +718,314 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                       <span className="text-slate-400">
                         USDC <span className="text-white font-bold">{usdcBalance ?? '…'}</span>
                       </span>
+                      {networkOk === true ? (
+                        <span className="inline-flex items-center font-extrabold text-emerald-400">
+                          <Wifi className="w-3 h-3 mr-1" />
+                          {networkLabel} ✓
+                        </span>
+                      ) : networkOk === false ? (
+                        <span className="inline-flex items-center font-extrabold text-rose-400">
+                          <WifiOff className="w-3 h-3 mr-1" />
+                          {networkLabel}
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 text-[11px] font-mono space-y-1">
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Amount:</span>
+                        <span className="text-white font-bold">{usdcAmount} USDC</span>
+                      </div>
+                      <div className="flex justify-between gap-2">
+                        <span className="text-slate-400 shrink-0">Destination:</span>
+                        <span className="text-white font-bold truncate">{wallet.address}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Network:</span>
+                        <span className="text-white font-bold">{networkLabel || '…'}</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    {networkOk === true ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
-                        <Wifi className="w-3 h-3 mr-1" />
-                        {networkLabel} ✓
-                      </span>
-                    ) : networkOk === false ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-rose-500/15 border border-rose-500/30 text-rose-400">
-                        <WifiOff className="w-3 h-3 mr-1" />
-                        {networkLabel}
-                      </span>
-                    ) : null}
+                )}
+
+                {networkOk === false && (
+                  <div className="rounded-xl bg-amber-500/10 border border-amber-500/30 p-3 text-[11px] font-mono text-amber-300 space-y-1">
+                    <p className="font-extrabold">Network config invalid{networkError ? `: ${networkError.replace(/^NETWORK_CONFIG\s*/, '')}` : ''}</p>
+                    <p className="text-amber-200/80">Fix: copy <span className="font-bold">apps/demo/.env.testnet.example</span> to <span className="font-bold">apps/demo/.env</span>, then restart the dev server.</p>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Mode</span>
+                  <div className="flex items-center gap-1.5">
+                    {(['fast', 'standard'] as TransferMode[]).map((mode) => (
+                      <button
+                        key={mode}
+                        type="button"
+                        onClick={() => handleModeChange(mode)}
+                        disabled={inputsDisabled || (mode === 'fast' && fastUnavailable)}
+                        className={`px-3 py-1 rounded-full text-[11px] font-extrabold transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                          deposit.mode === mode
+                            ? 'bg-[#3E6BFF] text-white shadow-md'
+                            : 'bg-slate-900/80 text-slate-400 border border-slate-800 hover:text-white hover:border-slate-700'
+                        }`}
+                      >
+                        {mode === 'fast' ? 'Fast' : 'Standard'}
+                      </button>
+                    ))}
                   </div>
                 </div>
-              )}
 
-              {/* Error Simulation Select */}
-              {wallet.connected && (
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                    Simulate Error
+                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Max Fee (USDC, optional)
                   </label>
-                  <select
-                    value={simError}
-                    onChange={(e) => setSimError(e.target.value)}
+                  <input
+                    type="text"
+                    value={maxFee}
+                    onChange={(e) => setMaxFee(e.target.value)}
+                    placeholder="No cap"
                     disabled={inputsDisabled}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs font-bold text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                  >
-                    <option value="none" className="bg-slate-900 text-white">None</option>
-                    <option value="rejected-signing" className="bg-slate-900 text-white">Freighter signing rejected</option>
-                    <option value="insufficient-xlm" className="bg-slate-900 text-white">Insufficient XLM balance</option>
-                    <option value="network-mismatch" className="bg-slate-900 text-white">Network mismatch (mainnet)</option>
-                  </select>
-                </div>
-              )}
-
-              {/* Review Line */}
-              {wallet.connected && (
-                <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800 text-xs font-mono space-y-1">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Amount:</span>
-                    <span className="text-white font-bold">{usdcAmount} USDC</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Destination:</span>
-                    <span className="text-white font-bold truncate max-w-[200px]">{wallet.address}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Network:</span>
-                    <span className="text-white font-bold">{networkLabel || '…'}</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Fee Quote Panel — shown before Execute (spec §7) */}
-              {wallet.connected && (
-                <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800 space-y-3 text-xs font-mono">
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-400 font-bold">Transfer Mode</span>
-                    <div className="flex items-center space-x-1.5">
-                      {(['fast', 'standard'] as TransferMode[]).map((mode) => (
-                        <button
-                          key={mode}
-                          type="button"
-                          onClick={() => handleModeChange(mode)}
-                          disabled={inputsDisabled || (mode === 'fast' && fastUnavailable)}
-                          className={`px-3 py-1 rounded-full text-[11px] font-extrabold transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
-                            deposit.mode === mode
-                              ? 'bg-[#3E6BFF] text-white shadow-md'
-                              : 'bg-slate-900/80 text-slate-400 border border-slate-800 hover:text-white hover:border-slate-700'
-                          }`}
-                        >
-                          {mode === 'fast' ? 'Fast' : 'Standard'}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Route:</span>
-                    <span className="text-white font-bold">
-                      {activeDomain.name} → Stellar ({STELLAR_CCTP_DOMAIN})
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Minimum fee:</span>
-                    <span className="text-white font-bold">
-                      {quote ? `${quote.minimumFee} bps` : quoteError ? 'unavailable' : 'quoting…'}
-                    </span>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                      Max Fee (USDC, optional)
-                    </label>
-                    <input
-                      type="text"
-                      value={maxFee}
-                      onChange={(e) => setMaxFee(e.target.value)}
-                      placeholder="No cap"
-                      disabled={inputsDisabled}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs font-mono text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                    />
-                  </div>
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-mono text-white focus:ring-2 focus:ring-[#3E6BFF] outline-none transition-all"
+                  />
+                  <p className="text-[11px] font-mono text-slate-500">
+                    Fee: {quote ? `${quote.minimumFee} bps` : quoteError ? 'unavailable' : 'quoting…'}
+                  </p>
                   {overMax && (
-                    <div className="flex items-start text-amber-400 font-bold">
+                    <div className="flex items-start text-amber-400 font-bold text-[11px]">
                       <AlertCircle className="w-3.5 h-3.5 mr-1.5 mt-0.5 shrink-0" />
-                      <span>
-                        Quoted fee is above your max fee — raise the cap or switch to Standard, or this
-                        transfer would continue as Standard.
-                      </span>
+                      <span>Quoted fee is above your max — raise the cap or switch to Standard, or this transfer will continue as Standard.</span>
                     </div>
                   )}
                   {fastUnavailable && (
-                    <div className="flex items-start text-amber-400 font-bold">
+                    <div className="flex items-start text-amber-400 font-bold text-[11px]">
                       <AlertCircle className="w-3.5 h-3.5 mr-1.5 mt-0.5 shrink-0" />
                       <span>Fast allowance unavailable for this route — use Standard.</span>
                     </div>
                   )}
                   {quoteError && (
-                    <div className="flex items-start text-rose-300 font-bold">
+                    <div className="flex items-start text-rose-300 font-bold text-[11px]">
                       <AlertCircle className="w-3.5 h-3.5 mr-1.5 mt-0.5 shrink-0" />
                       <span>{quoteError}</span>
                     </div>
                   )}
                 </div>
-              )}
 
-              {/* Action CTA Button */}
-              <button
-                onClick={wallet.connected ? handleExecuteDeposit : onConnectWallet}
-                disabled={inputsDisabled}
-                className="w-full py-4 rounded-xl bg-[#3E6BFF] hover:bg-[#345CE0] text-white font-extrabold text-xs sm:text-sm transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
-              >
-                {inFlight || waiting ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>{inFlight ? 'Processing CCTP Ingestion...' : 'Waiting for Circle attestation...'}</span>
-                  </>
-                ) : deposit.step === 'quoting' ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>Re-quoting the Circle fee...</span>
-                  </>
-                ) : wallet.connected ? (
-                  <>
-                    <span>Execute Deposit Now</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                ) : (
-                  <span>Connect Freighter Wallet</span>
+                {wallet.connected && (
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      Simulate Error
+                    </label>
+                    <select
+                      value={simError}
+                      onChange={(e) => setSimError(e.target.value)}
+                      disabled={inputsDisabled}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-bold text-white focus:ring-2 focus:ring-[#3E6BFF] outline-none transition-all"
+                    >
+                      <option value="none" className="bg-slate-900 text-white">None</option>
+                      <option value="rejected-signing" className="bg-slate-900 text-white">Freighter signing rejected</option>
+                      <option value="insufficient-xlm" className="bg-slate-900 text-white">Insufficient XLM balance</option>
+                      <option value="network-mismatch" className="bg-slate-900 text-white">Network mismatch (mainnet)</option>
+                    </select>
+                  </div>
                 )}
-              </button>
-              {!wallet.connected && wallet.error && (
-                <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-xs font-mono text-rose-300">
-                  <span className="font-bold">Wallet connection failed: </span>
-                  {wallet.error}
-                  {/install/i.test(wallet.error) && (
+
+                <button
+                  onClick={wallet.connected ? handleExecuteDeposit : onConnectWallet}
+                  disabled={inputsDisabled}
+                  className="mt-auto w-full py-3.5 rounded-xl bg-[#3E6BFF] hover:bg-[#345CE0] text-white font-extrabold text-xs sm:text-sm transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+                >
+                  {inFlight || waiting ? (
                     <>
-                      {' — '}
-                      <a
-                        href="https://freighter.app"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="underline font-bold"
-                      >
-                        Install Freighter
-                      </a>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>{inFlight ? 'Processing…' : 'Waiting attestation…'}</span>
                     </>
+                  ) : deposit.step === 'quoting' ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Re-quoting fee…</span>
+                    </>
+                  ) : wallet.connected ? (
+                    <>
+                      <span>Execute Deposit Now</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  ) : (
+                    <span>Connect Freighter Wallet</span>
+                  )}
+                </button>
+                {!wallet.connected && wallet.error && (
+                  <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-[11px] font-mono text-rose-300">
+                    <span className="font-bold">Wallet connection failed: </span>
+                    {wallet.error}
+                    {/install/i.test(wallet.error) && (
+                      <>
+                        {' — '}
+                        <a
+                          href="https://freighter.app"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline font-bold"
+                        >
+                          Install Freighter
+                        </a>
+                      </>
+                    )}
+                  </div>
+                )}
+              </motion.div>
+
+              {/* Card 3 — Receive & tracking */}
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{ duration: 0.55, ease: 'easeOut', delay: 0.2 }}
+                className="rounded-3xl bg-[#0D1527] border border-slate-800 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.7)] p-6 flex flex-col gap-4 md:rotate-2 hover:rotate-0 transition-transform duration-500"
+              >
+                <div>
+                  <h3 className="text-2xl font-extrabold text-white tracking-tight">Receive USDC</h3>
+                  <p className="text-slate-400 text-sm font-medium mt-1 leading-relaxed">
+                    Check tracking to see the delivery status.
+                  </p>
+                </div>
+
+                {/* Stepper */}
+                <div className="rounded-2xl bg-slate-950/60 border border-slate-800/80 p-4">
+                  <div className="flex items-center justify-between">
+                    {['Burn', 'Attest', 'Settle'].map((label, i) => {
+                      const activeIdx = deposit.step === 'settled' ? 3
+                        : deposit.step === 'settling' ? 2
+                        : waiting || deposit.step === 'burning' || deposit.step === 'quoting' ? 1
+                        : 0;
+                      const done = i < activeIdx;
+                      const current = i === activeIdx;
+                      return (
+                        <React.Fragment key={label}>
+                          <div className="flex flex-col items-center gap-1.5">
+                            <span className={`w-7 h-7 rounded-full border flex items-center justify-center text-[11px] font-black transition-all ${
+                              done ? 'bg-emerald-500 border-emerald-500 text-white'
+                              : current ? 'bg-[#3E6BFF] border-[#3E6BFF] text-white'
+                              : 'border-slate-700 text-slate-500'
+                            }`}>
+                              {done ? '✓' : i + 1}
+                            </span>
+                            <span className={`text-[10px] font-bold ${done || current ? 'text-white' : 'text-slate-500'}`}>{label}</span>
+                          </div>
+                          {i < 2 && <div className={`flex-1 h-[2px] mx-1 mb-5 rounded ${i < activeIdx ? 'bg-emerald-500' : 'bg-slate-800'}`} />}
+                        </React.Fragment>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Live status / receipt */}
+                <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 min-h-[132px] text-xs font-mono space-y-2">
+                  {deposit.step === 'settled' && deposit.receipt ? (
+                    <div className="space-y-2">
+                      {deposit.receipt.simulated && deposit.receipt.txHash.startsWith('SIM-') && (
+                        <div className="text-center text-amber-400 font-extrabold text-[11px] uppercase tracking-wider">
+                          ⚠ SIMULATED — No real transaction submitted
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 text-emerald-400 font-bold">
+                        <CheckCircle2 className="w-4 h-4 shrink-0" />
+                        <span>Payment received</span>
+                      </div>
+                      <div className="flex justify-between text-slate-400">
+                        <span>Minting Output:</span>
+                        <span className="text-white font-bold">{deposit.receipt.stellarAmount} USDC</span>
+                      </div>
+                      <div className="flex justify-between text-slate-400">
+                        <span>Dust sweep:</span>
+                        <span>{deposit.receipt.dust} base units</span>
+                      </div>
+                      <div className="flex justify-between text-slate-400 gap-2">
+                        <span>Stellar Tx:</span>
+                        {deposit.receipt.simulated && deposit.receipt.txHash.startsWith('SIM-') ? (
+                          <span className="truncate max-w-[140px] text-white">{deposit.receipt.txHash}</span>
+                        ) : (
+                          <a
+                            href={`https://stellar.expert/explorer/${network}/tx/${deposit.receipt.txHash}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="truncate max-w-[140px] text-white underline hover:text-emerald-400"
+                          >
+                            {deposit.receipt.txHash}
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ) : deposit.step === 'error' && deposit.errorDetails ? (
+                    <div className="rounded-xl bg-rose-950/40 border border-rose-800/60 p-3 flex items-start text-rose-300 font-extrabold">
+                      <AlertCircle className="w-4 h-4 mr-1.5 shrink-0 mt-0.5 text-rose-400" />
+                      <span>{deposit.errorDetails}</span>
+                    </div>
+                  ) : deposit.step === 'cancelled' ? (
+                    <div className="space-y-3">
+                      <p className="font-extrabold text-slate-200">Cancelled — no mint was attempted.</p>
+                      <p className="text-slate-500">Cancelling stops waiting; your burn stays valid — retry anytime.</p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleRetryStandard}
+                          className="flex-1 py-2.5 rounded-xl bg-[#3E6BFF] hover:bg-[#345CE0] text-white font-extrabold text-[11px] transition-all cursor-pointer"
+                        >
+                          Retry Standard
+                        </button>
+                        <button
+                          onClick={handleDismissCancelled}
+                          className="flex-1 py-2.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 text-slate-300 font-extrabold text-[11px] transition-all cursor-pointer"
+                        >
+                          New transfer
+                        </button>
+                      </div>
+                    </div>
+                  ) : !isPreBurn ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-slate-300">
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#3E6BFF]" />
+                        <span>
+                          {deposit.step === 'burning' && 'Verifying wallet & registering burn…'}
+                          {deposit.step === 'fast-wait' && `Fast: attestation in seconds (attempt ${Math.max(deposit.attempts, 1)})`}
+                          {deposit.step === 'degraded-standard' && 'Fast unavailable — continuing as Standard…'}
+                          {deposit.step === 'attesting' && `Standard: attestation in minutes (attempt ${Math.max(deposit.attempts, 1)})`}
+                          {deposit.step === 'settling' && 'Submitting Soroban mint…'}
+                        </span>
+                      </div>
+                      {waiting && (
+                        <div className="space-y-2 border-t border-slate-800 pt-3">
+                          <p className="text-slate-500">
+                            Cancelling stops waiting; your burn stays valid — retry anytime.
+                          </p>
+                          <button
+                            onClick={handleCancel}
+                            className="w-full py-2.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-rose-500/50 hover:text-rose-300 text-slate-300 font-extrabold text-[11px] transition-all cursor-pointer"
+                          >
+                            Cancel waiting
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-slate-500 leading-relaxed">
+                      No transfer yet — pick a domain, fill in the burn hash, then execute. Live status shows up here.
+                    </p>
                   )}
                 </div>
-              )}
+
+                <div className="mt-auto pt-4 border-t border-slate-800/80 text-[11px] font-mono text-slate-500 space-y-1">
+                  <div className="flex justify-between">
+                    <span>Route:</span>
+                    <span className="text-slate-200 font-bold">{activeDomain.name} → Stellar</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Network:</span>
+                    <span className="text-slate-200 font-bold">{networkLabel || '…'}</span>
+                  </div>
+                </div>
+              </motion.div>
             </div>
 
-            {/* Settlement Receipt */}
-            {deposit.step === 'settled' && deposit.receipt && (
-              <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl space-y-2 text-xs font-mono">
-                {deposit.receipt.simulated && deposit.receipt.txHash.startsWith('SIM-') && (
-                  <div className="text-center text-amber-400 font-extrabold text-[11px] uppercase tracking-wider mb-2">
-                    ⚠ SIMULATED — No real transaction submitted
-                  </div>
-                )}
-                <div className="flex justify-between text-emerald-400 font-bold">
-                  <span>Minting Output:</span>
-                  <span>{deposit.receipt.stellarAmount} USDC</span>
-                </div>
-                <div className="flex justify-between text-slate-400">
-                  <span>Dust Sweep:</span>
-                  <span>{deposit.receipt.dust} base units</span>
-                </div>
-                <div className="flex justify-between text-slate-400">
-                  <span>Stellar Tx:</span>
-                  {deposit.receipt.simulated && deposit.receipt.txHash.startsWith('SIM-') ? (
-                    <span className="truncate max-w-[140px] text-white">{deposit.receipt.txHash}</span>
-                  ) : (
-                    <a
-                      href={`https://stellar.expert/explorer/${network}/tx/${deposit.receipt.txHash}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="truncate max-w-[140px] text-white underline hover:text-emerald-400"
-                    >
-                      {deposit.receipt.txHash}
-                    </a>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Error Display */}
-            {deposit.step === 'error' && deposit.errorDetails && (
-              <div className="mt-4 p-4 bg-rose-950/40 border border-rose-800/60 rounded-xl space-y-2">
-                <div className="flex items-center text-rose-300 font-extrabold text-xs">
-                  <AlertCircle className="w-4 h-4 mr-1.5 text-rose-400 shrink-0" />
-                  {deposit.errorDetails}
-                </div>
-              </div>
-            )}
-
-            {/* Cancelled — the wait stopped, the burn did not go away (spec §7) */}
-            {deposit.step === 'cancelled' && (
-              <div className="mt-4 p-4 bg-slate-950/60 border border-slate-800 rounded-xl space-y-3">
-                <div className="text-xs font-extrabold text-slate-200">Cancelled — no mint was attempted.</div>
-                <p className="text-xs text-slate-400 font-mono">
-                  Cancelling stops waiting; your burn stays valid — retry anytime.
-                </p>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={handleRetryStandard}
-                    className="flex-1 py-3 rounded-xl bg-[#3E6BFF] hover:bg-[#345CE0] text-white font-extrabold text-xs transition-all cursor-pointer"
-                  >
-                    Retry as Standard
-                  </button>
-                  <button
-                    onClick={handleDismissCancelled}
-                    className="flex-1 py-3 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 text-slate-300 font-extrabold text-xs transition-all cursor-pointer"
-                  >
-                    Start a new transfer
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Step Indicator */}
-            {!isPreBurn && deposit.step !== 'settled' && deposit.step !== 'error' && deposit.step !== 'cancelled' && (
-              <div className="mt-4 p-3 bg-slate-950/60 rounded-xl border border-slate-800 text-xs font-mono space-y-3">
-                <div className="flex items-center space-x-2 text-slate-400">
-                  {deposit.step === 'burning' && (
-                    <>
-                      <RefreshCw className="w-3 h-3 animate-spin text-blue-400" />
-                      <span>Verifying wallet and registering the burn…</span>
-                    </>
-                  )}
-                  {deposit.step === 'fast-wait' && (
-                    <>
-                      <RefreshCw className="w-3 h-3 animate-spin text-blue-400" />
-                      <span>
-                        Fast Transfer: attestation expected in seconds (attempt {Math.max(deposit.attempts, 1)})
-                      </span>
-                    </>
-                  )}
-                  {deposit.step === 'degraded-standard' && (
-                    <>
-                      <RefreshCw className="w-3 h-3 animate-spin text-amber-400" />
-                      <span>
-                        Fast allowance unavailable — continuing as Standard (minutes). Cancel or leave open.
-                      </span>
-                    </>
-                  )}
-                  {deposit.step === 'attesting' && (
-                    <>
-                      <RefreshCw className="w-3 h-3 animate-spin text-blue-400" />
-                      <span>
-                        Standard Transfer: attestation expected in minutes (attempt {Math.max(deposit.attempts, 1)})
-                      </span>
-                    </>
-                  )}
-                  {deposit.step === 'settling' && (
-                    <>
-                      <RefreshCw className="w-3 h-3 animate-spin text-blue-400" />
-                      <span>Submitting Soroban mint…</span>
-                    </>
-                  )}
-                </div>
-                {waiting && (
-                  <div className="space-y-2 border-t border-slate-800 pt-3">
-                    <p className="text-slate-500">
-                      Cancelling stops waiting; your burn stays valid — retry anytime.
-                    </p>
-                    <button
-                      onClick={handleCancel}
-                      className="w-full py-2.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-rose-500/50 hover:text-rose-300 text-slate-300 font-extrabold text-[11px] transition-all cursor-pointer"
-                    >
-                      Cancel waiting
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

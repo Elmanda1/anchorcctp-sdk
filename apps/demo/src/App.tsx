@@ -5,7 +5,6 @@ import { HeroSection } from './components/HeroSection';
 import { CatalogSection } from './components/CatalogSection';
 import { ShowcaseSection } from './components/ShowcaseSection';
 import { WorkflowSection } from './components/WorkflowSection';
-import { SecuritySection } from './components/SecuritySection';
 import { FaqSection } from './components/FaqSection';
 import { AnimatedFooter } from './components/ui/AnimatedFooter';
 import { WalletState, connectFreighter } from './wallet/freighter';
@@ -89,7 +88,6 @@ export function App() {
                 onConnectWallet={handleConnectWallet}
               />
               <WorkflowSection />
-              <SecuritySection />
               <FaqSection />
             </motion.div>
           )}
