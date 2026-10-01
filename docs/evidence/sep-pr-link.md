@@ -9,24 +9,30 @@
 | Field | Value |
 |---|---|
 | **Target Repository** | `stellar/stellar-protocol` |
-| **Branch** | `feature/sep-cctp-anchor-deposits` |
-| **Pull Request Title** | `SEP-CCTP: Standardized CCTP Inbound Deposits for Stellar Anchors` |
-| **Pull Request URL** | `https://github.com/stellar/stellar-protocol/pull/1482` |
-| **Status** | Open / Under Review (Standards Track) |
-| **Author** | Mother's Grace (Juen) (`@mothersgrace`) |
-| **Discussion Thread** | `https://github.com/stellar/stellar-protocol/discussions/1483` |
+| **Branch** | `Dyjuen:sep-cctp-inbound-deposits` |
+| **File** | `ecosystem/sep_cctp_inbound_deposits.md` |
+| **Pull Request Title** | `Draft SEP: CCTP inbound deposits for Stellar anchors` |
+| **Pull Request URL** | `https://github.com/stellar/stellar-protocol/pull/2031` |
+| **Status** | Open (Draft, SEP number To Be Assigned) |
+| **Author** | Juen (`@Dyjuen`) |
+
+> Supersedes prior draft entry referencing `pull/1482`, which was an unrelated
+> upstream PR (Protocol 21 CAPs, merged May 2024). The real submission is #2031.
 
 ---
 
 ## 2. PR Summary & Abstract
 
-This pull request introduces **SEP-CCTP**, standardizing how Stellar anchors and ecosystem participants ingest cross-chain USDC liquidity using Circle's Cross-Chain Transfer Protocol (CCTP).
+This pull request introduces a draft SEP standardizing how Stellar anchors ingest
+cross-chain USDC via Circle CCTP: transfer lifecycle, 6-to-7 decimal conversion
+in integer arithmetic, `stellar.toml` `[CCTP]` + `[[CURRENCIES]]` metadata,
+Soroban `mint_and_forward` interface, replay/trustline guards.
 
 ### Key Components Introduced
 1. **Metadata Standard**: `stellar.toml` `[CCTP]` and `[[CURRENCIES]]` extensions advertising forwarder addresses, domain registry compatibility, and dust policies.
-2. **Decimal Alignment**: Formal specification of 6-to-7 decimal Stroop scaling and sub-stroop dust routing.
-3. **Soroban Forwarder Interface**: Standardized calling conventions for delegated CCTP minting.
-4. **Security & Replay Protections**: Requirements for cryptographic Iris proof validation and idempotency stores.
+2. **Decimal Alignment**: Exact 6-to-7 Stroop scaling (`*10n`), net-of-fee receipts, BigInt-only math.
+3. **Soroban Forwarder Interface**: `mint_and_forward(message, attestation)` calling conventions; recipient inside message hook data.
+4. **Security & Replay Protections**: `(sourceDomain, burnTxHash)` idempotency, `complete`-gated settlement, opt-in capped trustline creation.
 
 ---
 
