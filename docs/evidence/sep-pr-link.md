@@ -15,6 +15,7 @@
 | **Pull Request URL** | `https://github.com/stellar/stellar-protocol/pull/2031` |
 | **Status** | Open (Draft, SEP number To Be Assigned) |
 | **Author** | Juen (`@Dyjuen`) |
+| **Discussion** | `https://github.com/orgs/stellar/discussions/2032` (`[Pre-SEP] CCTP inbound deposits for Stellar anchors`) |
 
 > Supersedes prior draft entry referencing `pull/1482`, which was an unrelated
 > upstream PR (Protocol 21 CAPs, merged May 2024). The real submission is #2031.
