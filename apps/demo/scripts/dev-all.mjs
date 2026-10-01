@@ -6,16 +6,26 @@ import { readFileSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+/** Minimal KEY=VALUE reader — the repo has no dotenv dependency. */
+function readEnvFile(path) {
+  const out = {};
+  if (!existsSync(path)) return out;
+  for (const line of readFileSync(path, 'utf8').split('\n')) {
+    const t = line.trim();
+    if (!t || t.startsWith('#')) continue;
+    const i = t.indexOf('=');
+    if (i > 0) out[t.slice(0, i)] = t.slice(i + 1);
+  }
+  return out;
+}
+
+const demoDir = join(dirname(fileURLToPath(import.meta.url)), '..');
 const serverEnv = { ...process.env };
+
 if ((serverEnv.SIM_MODE ?? 'false').toLowerCase() !== 'true' && !serverEnv.STELLAR_SECRET) {
-  const testnetEnv = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '.env.testnet');
+  const testnetEnv = join(demoDir, '..', '..', '.env.testnet');
   if (existsSync(testnetEnv)) {
-    for (const line of readFileSync(testnetEnv, 'utf8').split('\n')) {
-      const t = line.trim();
-      if (!t || t.startsWith('#')) continue;
-      const i = t.indexOf('=');
-      if (i > 0) serverEnv[t.slice(0, i)] ??= t.slice(i + 1);
-    }
+    for (const [k, v] of Object.entries(readEnvFile(testnetEnv))) serverEnv[k] ??= v;
     serverEnv.STELLAR_SECRET ??= serverEnv.STELLAR_TESTNET_SECRET;
     serverEnv.STELLAR_DESTINATION ??= serverEnv.STELLAR_TESTNET_DESTINATION;
     serverEnv.STELLAR_NETWORK ??= 'testnet';
@@ -45,6 +55,13 @@ if ((serverEnv.SIM_MODE ?? 'false').toLowerCase() !== 'true' && !serverEnv.STELL
     console.log('[dev-all] real mode: mapped STELLAR_TESTNET_* from root .env.testnet');
   }
 }
+
+// The server reads CIRCLE_ATTESTATION_BASE_URL, but apps/demo/.env only exposes it to
+// the browser as VITE_ATTESTATION_URL. Without this bridge the server has no Iris
+// endpoint and answers every /api/fees with 503.
+const demoEnv = readEnvFile(join(demoDir, '.env'));
+serverEnv.CIRCLE_ATTESTATION_BASE_URL ??=
+  demoEnv.CIRCLE_ATTESTATION_BASE_URL ?? demoEnv.VITE_ATTESTATION_URL;
 
 const procs = [
   spawn('node', ['dist-server/serve.cjs'], {

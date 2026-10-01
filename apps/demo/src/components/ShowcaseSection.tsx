@@ -2,16 +2,10 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
-  Shield,
-  Layers,
-  Cpu,
-  RefreshCcw,
-  Sparkles,
-  ExternalLink,
-  CheckCircle2,
-  Lock,
+  ArrowSquareOut,
+  CheckCircle,
   Compass,
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 
 interface StandardCardProps {
   id: string;
@@ -148,15 +142,15 @@ export const ShowcaseSection: React.FC = () => {
             </p>
             <div className="space-y-3 pt-2">
               <div className="flex items-center space-x-3 text-sm font-bold text-slate-200">
-                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
                 <span>Automatic Soroban trustline creation for new recipient accounts</span>
               </div>
               <div className="flex items-center space-x-3 text-sm font-bold text-slate-200">
-                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
                 <span>Sponsor reserve pool protection capped at ≤ 2 XLM</span>
               </div>
               <div className="flex items-center space-x-3 text-sm font-bold text-slate-200">
-                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
                 <span>SEP-CCTP metadata standard compliance via stellar.toml</span>
               </div>
             </div>
@@ -324,7 +318,7 @@ export const ShowcaseSection: React.FC = () => {
 
                       <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-bold text-white bg-[#3E6BFF] hover:bg-[#345CE0] px-4 py-2.5 rounded-xl text-center">
                         <span>{std.ctaLabel}</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
+                        <ArrowSquareOut className="w-3.5 h-3.5" />
                       </div>
                     </div>
                   </motion.div>

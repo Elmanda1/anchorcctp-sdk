@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion, useScroll, useMotionValueEvent, useTransform } from "framer-motion";
-import { Menu, Wallet } from "lucide-react";
+import { List, Wallet } from "@phosphor-icons/react";
 import { cn } from "../../lib/utils";
 
 import { WalletState } from "../../wallet/freighter";
@@ -224,7 +224,7 @@ export function AnimatedNavbar({ wallet, onConnect, activeSection, setActiveSect
           variants={collapsedIconVariants}
           animate={isExpanded ? "expanded" : "collapsed"}
         >
-          <Menu className="h-5 w-5 text-white" />
+          <List className="h-5 w-5 text-white" />
         </motion.div>
       </div>
     </motion.nav>

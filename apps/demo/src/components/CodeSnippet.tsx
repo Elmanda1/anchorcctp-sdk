@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, Code2 } from 'lucide-react';
+import { Copy, Check, Code } from '@phosphor-icons/react';
 
 export const CodeSnippet: React.FC = () => {
   const [copied, setCopied] = useState(false);
@@ -45,7 +45,7 @@ console.log('Credited Stellar Amount:', result.amount);`;
       <div className="glass-card rounded-2xl p-6 shadow-xl space-y-4 bg-slate-900/95 text-white border border-slate-800 backdrop-blur-xl">
         <div className="flex items-center justify-between border-b border-slate-800 pb-4">
           <div className="flex items-center space-x-2">
-            <Code2 className="w-5 h-5 text-red-400" />
+            <Code className="w-5 h-5 text-red-400" />
             <span className="font-mono text-sm text-slate-300">deposit-service.ts</span>
           </div>
           <button

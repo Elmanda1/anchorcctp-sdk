@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, FileText } from 'lucide-react';
+import { Copy, Check, FileText } from '@phosphor-icons/react';
 import { loadNetworkConfig } from '../config/network.js';
 
 export const TomlInspector: React.FC = () => {

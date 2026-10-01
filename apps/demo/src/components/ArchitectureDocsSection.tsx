@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, ShieldCheck, ArrowRight, BookOpen, Lock, Network, FileCode } from 'lucide-react';
+import { Stack, ShieldCheck, ArrowRight, BookOpen, Lock, Network, FileCode } from '@phosphor-icons/react';
 
 export const ArchitectureDocsSection: React.FC = () => {
   return (
@@ -22,7 +22,7 @@ export const ArchitectureDocsSection: React.FC = () => {
           {/* Transfer Lifecycle Timeline */}
           <div className="lg:col-span-7 arch-card p-6 sm:p-8 rounded-2xl space-y-6 bg-slate-900/80 border border-slate-800">
             <h3 className="text-xl font-extrabold text-white flex items-center border-b border-slate-800 pb-4">
-              <Layers className="w-5 h-5 mr-2.5 text-[#3E6BFF]" />
+              <Stack className="w-5 h-5 mr-2.5 text-[#3E6BFF]" />
               4-Stage Inbound Transfer Lifecycle
             </h3>
 

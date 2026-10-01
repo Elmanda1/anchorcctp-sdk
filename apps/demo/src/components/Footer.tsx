@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExternalLink } from 'lucide-react';
+import { ArrowSquareOut } from '@phosphor-icons/react';
 
 export const Footer: React.FC = () => {
   return (
@@ -40,7 +40,7 @@ export const Footer: React.FC = () => {
               rel="noreferrer"
               className="hover:text-white transition-colors flex items-center space-x-1.5"
             >
-              <ExternalLink className="w-3.5 h-3.5" />
+              <ArrowSquareOut className="w-3.5 h-3.5" />
               <span>SEP-CCTP Specification</span>
             </a>
           </div>

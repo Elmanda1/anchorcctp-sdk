@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wallet } from 'lucide-react';
+import { Wallet } from '@phosphor-icons/react';
 import { WalletState } from '../wallet/freighter';
 
 interface NavbarProps {

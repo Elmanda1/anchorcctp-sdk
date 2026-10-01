@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, FileText } from 'lucide-react';
+import { ArrowLeft, FileText } from '@phosphor-icons/react';
 
 interface Props {
   onNavigate: (page: 'home' | 'privacy' | 'terms' | 'support') => void;

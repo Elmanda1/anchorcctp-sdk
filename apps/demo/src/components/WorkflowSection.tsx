@@ -3,12 +3,12 @@ import { motion, useScroll, useSpring } from 'framer-motion';
 import {
   Globe,
   Lock,
-  RefreshCcw,
+  ArrowsClockwise,
   Cpu,
-  FileCheck,
-  ShieldAlert,
+  SealCheck,
+  ShieldWarning,
   ArrowRight,
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 
 export const WorkflowSection: React.FC = () => {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -61,7 +61,7 @@ export const WorkflowSection: React.FC = () => {
       codeSnippet: `const proof = await irisApi.getAttestation({\n  txHash: burnTxHash,\n  retries: 5,\n});`,
     },
     {
-      icon: <RefreshCcw className="w-5 h-5 text-cyan-400" />,
+      icon: <ArrowsClockwise className="w-5 h-5 text-cyan-400" />,
       title: 'Lossless Decimal Scaling (6 to 7 Stroops)',
       description:
         'Integer math preserves exact value between 6-decimal EVM/SVM tokens and 7-decimal Stellar Stroops.',
@@ -75,14 +75,14 @@ export const WorkflowSection: React.FC = () => {
       codeSnippet: `await forwarderContract.invoke({\n  method: "receive",\n  args: [recipient, amount, attestation]\n});`,
     },
     {
-      icon: <FileCheck className="w-5 h-5 text-amber-400" />,
+      icon: <SealCheck className="w-5 h-5 text-amber-400" />,
       title: 'Replay Guard & Idempotency',
       description:
         'Prevents double-crediting by tracking processed burn hashes in an append-only transaction store.',
       codeSnippet: `if (await store.isBurnProcessed(hash)) {\n  throw new ReplayError("Transaction already minted");\n}`,
     },
     {
-      icon: <ShieldAlert className="w-5 h-5 text-[#3E6BFF]" />,
+      icon: <ShieldWarning className="w-5 h-5 text-[#3E6BFF]" />,
       title: 'SEP-CCTP Ecosystem Standards',
       description:
         'Stellar ecosystem standard extending stellar.toml with verified forwarder addresses and dust collector rules.',

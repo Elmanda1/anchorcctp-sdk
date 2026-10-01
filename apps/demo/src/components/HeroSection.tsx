@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { ArrowRight, Terminal } from 'lucide-react';
+import { ArrowRight, Terminal } from '@phosphor-icons/react';
 
 interface HeroSectionProps {
   onExploreDemo: () => void;
@@ -28,6 +28,54 @@ function useLogoTilt() {
   };
   return { rotateX, rotateY, onMove, onLeave };
 }
+
+/**
+ * Brand marks that ride the attestation ring on hover — six of the CCTP source
+ * chains a deposit can originate from. Each sits on a light plate so dark brand
+ * marks (Ethereum's greys, Arbitrum's navy) stay legible against the dark hero.
+ * Angles are chosen just off the vertical axis so no chip lands on the
+ * artwork's flame or anchor tips.
+ */
+const ORBIT_CHAINS = [
+  { src: '/logos/ethereum.svg', label: 'Ethereum', angle: 30 },
+  { src: '/logos/arbitrum.svg', label: 'Arbitrum', angle: 90 },
+  { src: '/logos/base.svg', label: 'Base', angle: 150 },
+  { src: '/logos/solana.svg', label: 'Solana', angle: 210 },
+  { src: '/logos/polygon.svg', label: 'Polygon', angle: 270 },
+  { src: '/logos/avalanche.svg', label: 'Avalanche', angle: 330 },
+];
+
+/** Ring radius as a percentage of the square logo box. */
+const ORBIT_RADIUS = 47;
+
+const polar = (deg: number) => {
+  const rad = (deg * Math.PI) / 180;
+  return { left: `${50 + ORBIT_RADIUS * Math.sin(rad)}%`, top: `${50 - ORBIT_RADIUS * Math.cos(rad)}%` };
+};
+
+const chipVariants = {
+  rest: { opacity: 0, scale: 0.5 },
+  hover: {
+    opacity: 1,
+    scale: 1,
+    transition: { type: 'spring' as const, stiffness: 260, damping: 18 },
+  },
+};
+
+const ringContainerVariants = {
+  rest: {},
+  hover: { transition: { staggerChildren: 0.055, delayChildren: 0.08 } },
+};
+
+const ringLineVariants = {
+  rest: { opacity: 0, scale: 0.92 },
+  hover: { opacity: 1, scale: 1, transition: { duration: 0.55, ease: 'easeOut' as const } },
+};
+
+const glowVariants = {
+  rest: { opacity: 0.35, scale: 0.9 },
+  hover: { opacity: 1, scale: 1, transition: { duration: 0.6, ease: 'easeOut' as const } },
+};
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
   onExploreDemo,
@@ -85,7 +133,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
           </motion.div>
 
-          {/* Right Column: logo with pointer tilt, sheen sweep, and hover reveal */}
+          {/* Right Column: pointer-tilted logo wrapped in an attestation ring */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -94,33 +142,62 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             className="lg:col-span-5 flex justify-center items-center relative overflow-visible"
             style={{ perspective: 1000 }}
           >
-            <div
+            <motion.div
               role="img"
-              aria-label="AnchorCCTP logo — anchor fused with the Stellar orbit mark"
+              aria-label="AnchorCCTP logo — anchor fused with the Stellar orbit mark, ringed by logos of the source chains a deposit can come from"
               tabIndex={0}
+              initial="rest"
+              animate="rest"
+              whileHover="hover"
+              whileFocus="hover"
+              variants={ringContainerVariants}
               onMouseMove={onMove}
               onMouseLeave={onLeave}
               onFocus={onLeave}
-              className="group relative w-full flex items-center justify-center shrink-0 py-4 outline-none focus-visible:ring-2 focus-visible:ring-[#3E6BFF] focus-visible:ring-offset-4 focus-visible:ring-offset-[#070C18] rounded-3xl"
+              className="group relative shrink-0 w-[420px] h-[420px] sm:w-[540px] sm:h-[540px] lg:w-[650px] lg:h-[650px] outline-none focus-visible:ring-2 focus-visible:ring-[#3E6BFF] focus-visible:ring-offset-4 focus-visible:ring-offset-[#070C18] rounded-full"
             >
+              {/* Ambient bloom, brightening on hover */}
+              <motion.span
+                aria-hidden="true"
+                variants={glowVariants}
+                className="pointer-events-none absolute inset-[18%] rounded-full bg-[radial-gradient(circle,rgba(62,107,255,0.55)_0%,rgba(6,182,212,0.18)_45%,transparent_72%)] blur-3xl"
+              />
+
+              {/* Dashed orbit — spins only while hovered/focused (see .orbit-ring) */}
+              <motion.span
+                aria-hidden="true"
+                variants={ringLineVariants}
+                className="orbit-ring pointer-events-none absolute -inset-[4%] rounded-full border border-dashed border-[#3E6BFF]/45"
+              />
+
               <motion.img
                 src="/assets/img/final.svg"
                 alt=""
                 style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
-                className="w-[420px] h-[420px] sm:w-[540px] sm:h-[540px] lg:w-[650px] lg:h-[650px] object-contain drop-shadow-[0_20px_50px_rgba(62,107,255,0.2)] transition-[filter] duration-500 group-hover:drop-shadow-[0_28px_80px_rgba(62,107,255,0.45)] group-focus-visible:drop-shadow-[0_28px_80px_rgba(62,107,255,0.45)] motion-reduce:transition-none"
+                className="relative z-10 w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(62,107,255,0.2)] transition-[filter] duration-500 group-hover:drop-shadow-[0_28px_80px_rgba(62,107,255,0.45)] group-focus-visible:drop-shadow-[0_28px_80px_rgba(62,107,255,0.45)] motion-reduce:transition-none"
               />
-              {/* Sheen sweep — one pass per hover entry, then rests */}
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-y-8 left-1/2 w-1/3 -translate-x-[320%] skew-x-[-14deg] bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 transition-all duration-1000 ease-out group-hover:translate-x-[220%] group-hover:opacity-100 group-focus-visible:translate-x-[220%] group-focus-visible:opacity-100 motion-reduce:hidden"
-              />
-              {/* Hover reveal — real settlement facts, keyboard reachable via focus */}
-              <div className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 translate-y-3 opacity-0 transition-all duration-400 ease-out group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 motion-reduce:transition-none">
-                <p className="whitespace-nowrap rounded-xl border border-slate-700/70 bg-slate-950/90 px-4 py-2.5 font-mono text-[11px] text-slate-200 shadow-xl">
-                  burn <span className="text-slate-500">→</span> attest <span className="text-slate-500">→</span> <span className="text-white font-bold">settle on Stellar</span>
-                </p>
-              </div>
-            </div>
+
+              {/* Source-chain marks orbiting the artwork, staggered in on hover */}
+              <span aria-hidden="true" className="absolute inset-0 z-20">
+                {ORBIT_CHAINS.map(({ src, label, angle }) => (
+                  <motion.span
+                    key={label}
+                    variants={chipVariants}
+                    style={polar(angle)}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white/95 ring-1 ring-white/25 shadow-[0_10px_28px_-12px_rgba(0,0,0,0.9)] transition-shadow duration-500 group-hover:ring-2 group-hover:ring-[#3E6BFF]/70 group-focus-visible:ring-2 group-focus-visible:ring-[#3E6BFF]/70 motion-reduce:transition-none"
+                  >
+                    <img
+                      src={src}
+                      alt=""
+                      draggable={false}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-6 h-6 sm:w-[26px] sm:h-[26px] object-contain select-none"
+                    />
+                  </motion.span>
+                ))}
+              </span>
+            </motion.div>
           </motion.div>
         </div>
       </div>

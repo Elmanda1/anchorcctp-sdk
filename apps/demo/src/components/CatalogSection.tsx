@@ -3,12 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CCTP_DOMAINS } from '@anchor-cctp/core-sdk';
 import {
   ArrowRight,
-  CheckCircle2,
-  AlertCircle,
-  RefreshCw,
-  Wifi,
-  WifiOff,
-} from 'lucide-react';
+  CheckCircle,
+  WarningCircle,
+  ArrowsClockwise,
+  WifiHigh,
+  WifiSlash,
+} from '@phosphor-icons/react';
 import { WalletState, fetchBalances } from '../wallet/freighter';
 import { loadNetworkConfig } from '../config/network';
 import {
@@ -26,6 +26,76 @@ import {
   nextPollDelay,
   quoteFeeOverMax,
 } from '../catalog/depositMachine';
+
+/**
+ * Chain marks for the domain list, keyed by the domain's `chain` slug.
+ *
+ * Real brand assets live under /logos. Chains we have no asset for fall back to
+ * a colored initial tile — the same shape the existing base.svg already uses —
+ * so every row reads as its own chain instead of collapsing onto one shared mark.
+ */
+const CHAIN_LOGOS: Record<string, string> = {
+  ethereum: '/logos/ethereum.svg',
+  avalanche: '/logos/avalanche.svg',
+  optimism: '/logos/optimism.svg',
+  arbitrum: '/logos/arbitrum.svg',
+  solana: '/logos/solana.svg',
+  base: '/logos/base.svg',
+  polygon: '/logos/polygon.svg',
+  aptos: '/logos/aptos.png',
+  linea: '/logos/linea.png',
+  sonic: '/logos/sonic.png',
+  monad: '/logos/monad.png',
+  sei: '/logos/sei.png',
+  bnb: '/logos/bnb.png',
+  xdc: '/logos/xdc.png',
+  hyperevm: '/logos/hyperevm.png',
+  stellar: '/logos/stellar.png',
+  cronos: '/logos/cronos.png',
+  plasma: '/logos/plasma.png',
+};
+
+const CHAIN_MONOGRAMS: Record<string, { color: string; label: string }> = {
+  unichain: { color: '#FF007A', label: 'U' },
+  codex: { color: '#4F46E5', label: 'C' },
+  worldchain: { color: '#4B5563', label: 'W' },
+  ink: { color: '#7C3AED', label: 'I' },
+  plume: { color: '#EC4899', label: 'P' },
+  starknet: { color: '#2563EB', label: 'S' },
+  arc: { color: '#0EA5E9', label: 'A' },
+  edge: { color: '#10B981', label: 'E' },
+  injective: { color: '#0082FA', label: 'I' },
+  morph: { color: '#16A34A', label: 'M' },
+  pharos: { color: '#F97316', label: 'P' },
+  xlayer: { color: '#64748B', label: 'X' },
+};
+
+const DomainLogo: React.FC<{ chain: string; name: string; className?: string }> = ({
+  chain,
+  name,
+  className,
+}) => {
+  const src = CHAIN_LOGOS[chain];
+  if (src) return <img src={src} alt={name} className={className} />;
+
+  const mark = CHAIN_MONOGRAMS[chain] ?? { color: '#334155', label: name.charAt(0) };
+  return (
+    <svg viewBox="0 0 32 32" className={className} role="img" aria-label={name}>
+      <circle cx="16" cy="16" r="16" fill={mark.color} />
+      <text
+        x="16"
+        y="22"
+        textAnchor="middle"
+        fontFamily="Arial, sans-serif"
+        fontSize="18"
+        fontWeight="bold"
+        fill="#fff"
+      >
+        {mark.label}
+      </text>
+    </svg>
+  );
+};
 
 interface CatalogSectionProps {
   wallet: WalletState;
@@ -110,19 +180,6 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
   const network = React.useMemo(() => {
     try { return loadNetworkConfig().network; } catch { return 'testnet'; }
   }, []);
-
-  const getDomainLogo = (domainId: number) => {
-    switch (domainId) {
-      case 0: return '/logos/ethereum.svg';
-      case 1: return '/logos/avalanche.svg';
-      case 2: return '/logos/optimism.svg';
-      case 3: return '/logos/arbitrum.svg';
-      case 5: return '/logos/solana.svg';
-      case 6: return '/logos/base.svg';
-      case 7: return '/logos/polygon.svg';
-      default: return '/logos/usdc.svg';
-    }
-  };
 
   const refreshBalances = async () => {
     if (!wallet.address) return;
@@ -503,7 +560,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
   return (
     <section id="catalog" className="py-20 lg:py-28 relative bg-[#070C18] border-t border-slate-800 w-full overflow-hidden">
       <div className="w-full max-w-[1700px] mx-auto px-6 sm:px-10 lg:px-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-start">
 
           {/* Left: oversized editorial headline, mirroring the reference layout */}
           <motion.div
@@ -523,17 +580,6 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
               Pick a domain, burn, then watch USDC land on Stellar. Transfer 1:1 USDC from 26+ chains straight to your Stellar account.
             </p>
             <div className="flex items-center gap-2 pt-2">
-              {wallet.connected ? (
-                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-extrabold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
-                  <Wifi className="w-3 h-3 mr-1.5" />
-                  {networkLabel || 'Connected'} ✓
-                </span>
-              ) : (
-                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-extrabold bg-slate-800/80 border border-slate-700 text-slate-300">
-                  <WifiOff className="w-3 h-3 mr-1.5" />
-                  Wallet not connected
-                </span>
-              )}
               {wallet.connected && (xlmBalance !== null || usdcBalance !== null) && (
                 <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-mono font-bold bg-slate-800/80 border border-slate-700 text-slate-200">
                   {usdcBalance ?? '…'} USDC · {xlmBalance ?? '…'} XLM
@@ -547,7 +593,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
 
           {/* Right: three tilted cards joined by a connector line, like the reference */}
           <div className="lg:col-span-9 relative">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-5 items-stretch relative z-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 lg:gap-14 items-stretch relative z-10">
 
               {/* Card 1 — Pick domain */}
               <motion.div
@@ -604,8 +650,8 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                               : 'bg-transparent border-transparent hover:border-slate-700 hover:bg-slate-900/70'
                           }`}
                         >
-                          <span className="w-9 h-9 shrink-0 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center p-1.5">
-                            <img src={getDomainLogo(domain.domainId)} alt={domain.name} className="w-full h-full object-contain" />
+                          <span className="w-11 h-11 sm:w-12 sm:h-12 shrink-0 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center p-1.5">
+                            <DomainLogo chain={domain.chain} name={domain.name} className="w-full h-full object-contain" />
                           </span>
                           <span className="flex-1 min-w-0">
                             <span className="flex items-center gap-2">
@@ -657,8 +703,8 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                 </div>
 
                 <div className="flex items-center gap-3 rounded-2xl bg-slate-950/60 border border-slate-800/80 p-3">
-                  <span className="w-10 h-10 shrink-0 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center p-2">
-                    <img src={getDomainLogo(activeDomain.domainId)} alt={activeDomain.name} className="w-full h-full object-contain" />
+                  <span className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center p-2">
+                    <DomainLogo chain={activeDomain.chain} name={activeDomain.name} className="w-full h-full object-contain" />
                   </span>
                   <span className="flex-1 min-w-0">
                     <span className="block text-sm font-extrabold text-white truncate">{activeDomain.name}</span>
@@ -720,12 +766,12 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                       </span>
                       {networkOk === true ? (
                         <span className="inline-flex items-center font-extrabold text-emerald-400">
-                          <Wifi className="w-3 h-3 mr-1" />
+                          <WifiHigh className="w-3 h-3 mr-1" />
                           {networkLabel} ✓
                         </span>
                       ) : networkOk === false ? (
                         <span className="inline-flex items-center font-extrabold text-rose-400">
-                          <WifiOff className="w-3 h-3 mr-1" />
+                          <WifiSlash className="w-3 h-3 mr-1" />
                           {networkLabel}
                         </span>
                       ) : null}
@@ -792,19 +838,19 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                   </p>
                   {overMax && (
                     <div className="flex items-start text-amber-400 font-bold text-[11px]">
-                      <AlertCircle className="w-3.5 h-3.5 mr-1.5 mt-0.5 shrink-0" />
+                      <WarningCircle className="w-3.5 h-3.5 mr-1.5 mt-0.5 shrink-0" />
                       <span>Quoted fee is above your max — raise the cap or switch to Standard, or this transfer will continue as Standard.</span>
                     </div>
                   )}
                   {fastUnavailable && (
                     <div className="flex items-start text-amber-400 font-bold text-[11px]">
-                      <AlertCircle className="w-3.5 h-3.5 mr-1.5 mt-0.5 shrink-0" />
+                      <WarningCircle className="w-3.5 h-3.5 mr-1.5 mt-0.5 shrink-0" />
                       <span>Fast allowance unavailable for this route — use Standard.</span>
                     </div>
                   )}
                   {quoteError && (
                     <div className="flex items-start text-rose-300 font-bold text-[11px]">
-                      <AlertCircle className="w-3.5 h-3.5 mr-1.5 mt-0.5 shrink-0" />
+                      <WarningCircle className="w-3.5 h-3.5 mr-1.5 mt-0.5 shrink-0" />
                       <span>{quoteError}</span>
                     </div>
                   )}
@@ -836,12 +882,12 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                 >
                   {inFlight || waiting ? (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <ArrowsClockwise className="w-4 h-4 animate-spin" />
                       <span>{inFlight ? 'Processing…' : 'Waiting attestation…'}</span>
                     </>
                   ) : deposit.step === 'quoting' ? (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <ArrowsClockwise className="w-4 h-4 animate-spin" />
                       <span>Re-quoting fee…</span>
                     </>
                   ) : wallet.connected ? (
@@ -928,7 +974,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                         </div>
                       )}
                       <div className="flex items-center gap-2 text-emerald-400 font-bold">
-                        <CheckCircle2 className="w-4 h-4 shrink-0" />
+                        <CheckCircle className="w-4 h-4 shrink-0" />
                         <span>Payment received</span>
                       </div>
                       <div className="flex justify-between text-slate-400">
@@ -957,7 +1003,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                     </div>
                   ) : deposit.step === 'error' && deposit.errorDetails ? (
                     <div className="rounded-xl bg-rose-950/40 border border-rose-800/60 p-3 flex items-start text-rose-300 font-extrabold">
-                      <AlertCircle className="w-4 h-4 mr-1.5 shrink-0 mt-0.5 text-rose-400" />
+                      <WarningCircle className="w-4 h-4 mr-1.5 shrink-0 mt-0.5 text-rose-400" />
                       <span>{deposit.errorDetails}</span>
                     </div>
                   ) : deposit.step === 'cancelled' ? (
@@ -982,7 +1028,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                   ) : !isPreBurn ? (
                     <div className="space-y-3">
                       <div className="flex items-center gap-2 text-slate-300">
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#3E6BFF]" />
+                        <ArrowsClockwise className="w-3.5 h-3.5 animate-spin text-[#3E6BFF]" />
                         <span>
                           {deposit.step === 'burning' && 'Verifying wallet & registering burn…'}
                           {deposit.step === 'fast-wait' && `Fast: attestation in seconds (attempt ${Math.max(deposit.attempts, 1)})`}
