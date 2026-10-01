@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/dev-all.mjs",
-    "predev": "npm run demo:server:build",
+    "predev": "npm run build --workspace=@anchor-cctp/core-sdk && npm run demo:server:build",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint .",
