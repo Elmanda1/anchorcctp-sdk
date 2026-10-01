@@ -1,151 +1,207 @@
-# SEP-CCTP: Cross-Chain Transfer Protocol (CCTP) Deposit Extension for Stellar Anchors
+# SEP-CCTP: CCTP Inbound Deposits for Stellar Anchors
+
+## Preamble
 
 ```
-SEP: CCTP-0001
-Title: Standardized CCTP Inbound Deposits for Stellar Anchors
-Author: Mother's Grace (Juen) <juen@mothersgrace.dev>
-Status: RFC — review requested
-PR: n/a — standalone project, no upstream stellar-protocol PR intended
-Type: Standards Track
-Created: 2026-08-24
-Discussion: https://github.com/stellar/stellar-protocol/discussions
+SEP: To Be Assigned
+Title: CCTP Inbound Deposits for Stellar Anchors
+Author: Juen (@Dyjuen)
+Status: Draft
+Created: 2026-10-01
+Updated: 2026-10-01
+Version: 0.0.1
+Discussion: https://github.com/orgs/stellar/discussions/2032
 ```
 
----
+## Simple Summary
 
-## 1. Abstract
+Stellar anchors cannot accept USDC from other chains without bespoke bridging work.
+This SEP standardizes the inbound path: burn USDC on a CCTP source chain, wait for
+Circle's signed attestation, mint Stellar USDC through a Soroban forwarder, credit
+the destination. Anchors advertise support in `stellar.toml`; wallets discover them
+the same way they discover everything else.
 
-This Stellar Ecosystem Proposal (SEP) specifies a standardized mechanism for Stellar anchors to advertise and accept cross-chain USDC deposits via Circle's Cross-Chain Transfer Protocol (CCTP). By establishing unified `stellar.toml` metadata extensions, Soroban forwarder calling conventions, 6-to-7 decimal scaling standards, and cryptographic attestation verification protocols, this specification eliminates bespoke bridging silos and enables single-call cross-chain liquidity ingestion across 29 connected blockchains.
+## Dependencies
 
----
+- SEP-1 (`stellar.toml` info file) — extended, not modified.
+- SEP-6 / SEP-24 (optional) — anchors MAY expose CCTP as a deposit rail under
+  existing deposit flows.
+- Circle CCTP + Iris Attestation API (external) — burn/mint mechanics, signed
+  attestations, domain registry (Stellar = 27).
+- Soroban — forwarder contract executing the mint.
 
-## 2. Motivation
+## Motivation
 
-Circle's CCTP provides native 1:1 burn-and-mint transfers of USDC across supported networks (e.g. Ethereum, Base, Solana, Arbitrum, Avalanche, Polygon). However, differences between external chains and Stellar present several friction points for anchors and wallets:
+CCTP connects Stellar to 29 source chains, but each anchor re-solves the same five
+problems: 6-decimal source USDC vs 7-decimal Stellar USDC, EVM address formats vs
+`G...` StrKeys, attestation polling/verification, domain mapping, destination
+trustlines. No shared standard exists; Anchor Platform is CCTP-unaware and Circle's
+tooling has no Stellar abstraction. Result: weeks of per-anchor plumbing for an
+identical flow. This SEP fixes the wire format and discovery so one integration
+serves every anchor.
 
-1. **Decimal Precision Mismatch**: External chains represent USDC in 6 decimal places ($10^{-6}$), whereas Stellar native assets operate on 7 decimal places (1 Stroop = $10^{-7}$).
-2. **Address Encoding**: EVM blockchains utilize 20-byte or 32-byte hexadecimal identifiers, whereas Stellar accounts are encoded as StrKey Ed25519 public keys (`G...`).
-3. **Attestation Verification & Idempotency**: Anchors must verify Circle Iris signatures cryptographically and guard against replay attacks before crediting user balances.
-4. **Anchor Discovery**: Wallets and cross-chain dApps require a standard discovery format to query an anchor's CCTP forwarder contract address, supported source domain IDs, and dust handling policies.
+## Abstract
 
-This SEP defines an open standard resolving each of these requirements.
+This SEP specifies inbound CCTP USDC deposits for Stellar anchors: a four-stage
+lifecycle (burn, attest, verify + replay-check, mint + credit), exact 6-to-7
+decimal conversion in integer arithmetic, `stellar.toml` metadata (`[CCTP]` block
+plus `[[CURRENCIES]]` extension), Soroban forwarder calling conventions, and
+mandatory replay/signature guards. Outbound (Stellar to external chain) is out of
+scope.
 
----
+## Specification
 
-## 3. Specification
-
-### 3.1 Transfer Lifecycle
-
-The standard CCTP inbound deposit flow comprises four sequential stages:
+### 3.1 Transfer lifecycle
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor User as Cross-Chain Sender
-    participant SC as Source Chain (e.g. Ethereum)
-    participant Circle as Circle Iris Attestation API
-    participant Forwarder as Soroban CCTP Forwarder
-    participant Anchor as Stellar Anchor
-    participant Dest as User Stellar Account (G...)
+    participant SC as Source Chain
+    participant Circle as Circle Iris API
+    participant Anchor as Stellar Anchor / SDK
+    participant Forwarder as Soroban Forwarder
+    participant Dest as Destination (G...)
 
     User->>SC: burn(amount, destinationDomain=27, recipient)
-    SC-->>Circle: MessageSent Event Emitted
-    Circle->>Circle: Validate Burn & Sign Attestation
-    Anchor->>Circle: Poll Attestation (iris-api.circle.com)
-    Circle-->>Anchor: Attestation Signature + Message Payload
-    Anchor->>Anchor: Cryptographic Signature Verification & Replay Check
-    Anchor->>Forwarder: submitMint(message, signature, destination)
-    Forwarder->>Dest: Mint & Credit 7-Decimal USDC
-    Anchor-->>User: Emit onSettled Event (Stellar Tx Hash)
+    SC-->>Circle: MessageSent event
+    Circle->>Circle: reach finality, sign attestation
+    Anchor->>Circle: poll attestation (v1 / v2, §3.2)
+    Circle-->>Anchor: message + attestation signature
+    Anchor->>Anchor: well-formedness + replay check (§3.6)
+    Anchor->>Forwarder: mint_and_forward(message, attestation)
+    Forwarder->>Dest: native Stellar USDC (7 decimals)
+    Anchor-->>User: onSettled (Stellar tx hash)
 ```
 
-1. **Source Burn**: The user burns USDC on the source blockchain targeting Stellar CCTP Domain ID `27`. The recipient is encoded as a 32-byte payload representing the destination Stellar Ed25519 public key.
-2. **Attestation Issuance**: Circle's Iris service monitors the burn event and issues a cryptographically signed attestation once source chain consensus/finality is reached.
-3. **Attestation Retrieval & Verification**: The anchor or SDK client polls the Circle Iris API (`/v1/attestations/{burnTxHash}`) and verifies the signature against Circle's public Iris verifying keys.
-4. **Forwarder Resolution & Mint**: The anchor invokes the Soroban Forwarder contract (`submitMint`) with the verified message and signature. The contract verifies the authorization payload and mints native Stellar USDC to the destination account.
-5. **Settlement**: The anchor credits the deposit, scaling decimals from 6 to 7 and routing fractional dust if applicable.
+1. **Source burn.** User burns USDC targeting domain `27`. Recipient is the
+   32-byte encoding of the destination Stellar key (EVM hook format carries the
+   recipient; see §3.5).
+2. **Attestation.** Circle Iris observes the burn and signs once finality holds.
+   Fast vs standard finality thresholds are a source-chain concern; anchors MUST
+   accept any attestation Circle marks `complete`.
+3. **Retrieval.** Anchor polls Iris until `complete` or budget exhaustion
+   (exponential backoff; see §3.2). Settlement MUST NOT precede `complete`.
+4. **Mint + credit.** Anchor submits to the forwarder (§3.5), converts decimals
+   (§3.3), ensures the trustline (§3.7), records the replay entry (§3.6).
 
----
+### 3.2 Attestation endpoints
 
-### 3.2 Decimal Arithmetic & Dust Accounting
+- v1 (legacy): `GET {base}/v1/attestations/{burnTxHash}` → `{status, message,
+  attestation}`. `status === "complete"` gates settlement.
+- v2: `GET {base}/v2/messages/{sourceDomain}?transactionHash={burnTxHash}` →
+  `{messages: [{message, attestation, status, decodedMessage}]}`.
+- Bases: mainnet `https://iris-api.circle.com`, testnet
+  `https://iris-api-sandbox.circle.com`. Base URL MUST match the deployment
+  network; mixing testnet attestations with mainnet mints MUST fail closed.
+- SDK shape check only (`0x`-hex, minimum lengths); full signature verification
+  is executed by the forwarder contract on-chain before any mint.
 
-Stellar asset amounts are fixed-point numbers with 7 decimal digits of precision ($1 \text{ unit} = 10,000,000 \text{ stroops}$). Source CCTP chains utilize 6 decimal digits ($1 \text{ unit} = 1,000,000 \text{ base units}$).
+### 3.3 Decimal conversion
 
-To maintain mathematical fidelity:
-- **Conversion Factor**: Every 1 source base unit equals 10 Stellar stroops.
-$$\text{Stellar Stroops} = \text{Source Units} \times 10$$
-- **Dust Calculation**: For non-integer or subdivided fractional amounts smaller than 1 source unit ($< 10^{-6}$):
-$$\text{dust} = \text{rawUnits} \pmod{10}$$
-- Any remaining sub-stroop dust is optionally swept to an anchor-designated `DUST_COLLECTOR_ACCOUNT` to ensure zero balance drift.
-- Floating-point calculations are strictly prohibited; all conversions MUST use 64-bit integer or arbitrary-precision BigInt arithmetic.
+- 1 source base unit (10^-6 USDC) = 10 stroops (10^-7 XLM-asset units).
+  `stellarAmount = cctpAmountBase6 * 10n`.
+- The forwarder mints the **net** amount: `gross burn amount - feeExecuted`
+  (the source-side fee is already taken). Receipts MUST report net, never gross.
+- 6→7 direction is exact; dust is `0n` by construction.
+- Dust exists only in the 7→6 direction (`stroops mod 10n`) or for sub-base-unit
+  remainders. Anchors MAY sweep dust to a designated collector; accounting MUST
+  balance (`credited + dust == received`).
+- All amount math MUST use `BigInt`/integer arithmetic. Floats are forbidden.
+  Amounts `<= 0n` or above `u64` max MUST be rejected with a typed error, never
+  clamped.
 
----
+### 3.4 `stellar.toml` metadata
 
-### 3.3 `stellar.toml` CCTP Metadata Extension
-
-Anchors advertising CCTP deposit support MUST publish the following extensions in their public `/.well-known/stellar.toml` file:
-
-#### 3.3.1 `[[CURRENCIES]]` Extension
+Anchors advertising CCTP support MUST publish both blocks. Testnet example:
 
 ```toml
 [[CURRENCIES]]
 code = "USDC"
 issuer = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
 cctp_domain = 27
-cctp_forwarder = "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC"
-```
+cctp_forwarder = "CA66Q2WFBND6V4UEB7RD4SAXSVIWMD6RA4X3U32ELVFGXV5PJK4T4VSZ"
 
-#### 3.3.2 `[CCTP]` Global Anchor Block
-
-```toml
 [CCTP]
 CCTP_DOMAIN = 27
-FORWARDER_ADDRESS = "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC"
+FORWARDER_ADDRESS = "CA66Q2WFBND6V4UEB7RD4SAXSVIWMD6RA4X3U32ELVFGXV5PJK4T4VSZ"
 SUPPORTED_SOURCE_DOMAINS = [0, 1, 2, 3, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 25, 26, 28, 29, 30, 31, 32, 33, 37]
 DUST_HANDLING = "collector_sweep"
-DUST_COLLECTOR_ACCOUNT = "GDDUSTCOLLECTOR00000000000000000000000000000000000000000000"
+# Replace with a real G... sink owned by the anchor:
+DUST_COLLECTOR_ACCOUNT = "G..."
 ```
 
-| Field | Type | Description |
+Mainnet differs in two values: USDC issuer
+`GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN` and forwarder
+`CBZL2IH7F6BIDAA3WBNXYKIXSATJGMSW7K5P5MJ6STX5RXN47TZJDF5T`.
+
+| Field | Type | Rule |
 |---|---|---|
-| `CCTP_DOMAIN` | Integer | Destination CCTP Domain ID for Stellar (always `27`). |
-| `FORWARDER_ADDRESS` | String (C...) | Soroban CCTP Forwarder contract address. |
-| `SUPPORTED_SOURCE_DOMAINS` | Array[Int] | List of authorized Circle CCTP source domain IDs. |
-| `DUST_HANDLING` | String | Strategy for handling dust (`collector_sweep` or `credit_destination`). |
-| `DUST_COLLECTOR_ACCOUNT` | String (G...) | Stellar account designated to receive swept dust. |
+| `CCTP_DOMAIN` | int | Always `27`. |
+| `FORWARDER_ADDRESS` | `C...` | Valid Soroban contract id, network-matched. |
+| `SUPPORTED_SOURCE_DOMAINS` | int[] | Subset of the registry below; `27` MUST NOT be a source. |
+| `DUST_HANDLING` | string | `collector_sweep` or `credit_destination`. |
+| `DUST_COLLECTOR_ACCOUNT` | `G...` | Required when `collector_sweep`. |
 
-Authoritative list: `CCTP_DOMAINS` in `@anchor-cctp/core-sdk` (`packages/core/src/domains/index.ts`).
+Source registry (authoritative in `@anchor-cctp/core-sdk` `CCTP_DOMAINS`,
+29 entries): 0 Ethereum, 1 Avalanche, 2 OP Mainnet, 3 Arbitrum, 5 Solana,
+6 Base, 7 Polygon, 9 Aptos, 10 Unichain, 11 Linea, 12 Codex, 13 Sonic,
+14 World Chain, 15 Monad, 16 Sei, 17 BNB, 18 XDC, 19 HyperEVM, 21 Ink,
+22 Plume, 25 Starknet, 26 Arc, 28 EDGE, 29 Injective, 30 Morph, 31 Pharos,
+32 Cronos, 33 Plasma, 37 X Layer.
 
----
+### 3.5 Forwarder interface
 
-## 4. Security Considerations
+- Entry: `mint_and_forward(message, attestation)`. Two args; no destination
+  parameter — the recipient travels inside the message/hook data (§3.1 step 1).
+- The contract verifies the attestation authorization payload on-chain and mints
+  native Stellar USDC to the decoded destination.
+- `submitMint` result MUST only be reported after network `SUCCESS`; broadcast
+  without confirmation is `unconfirmed`, never `settled`.
 
-### 4.1 Replay Attack Mitigation
-Every incoming CCTP message contains a unique source domain, nonce, and burn transaction hash. Anchors MUST record each processed `burnTxHash` in a persistent idempotency store before crediting funds. Subsequent requests containing an already-processed hash MUST be rejected immediately (`REPLAY_TRANSFER`).
+### 3.6 Replay protection and idempotency
 
-### 4.2 Signature Verification Before Credit
-Anchors MUST NEVER credit off-chain ledger balances or submit mint transactions based on unverified HTTP payloads. Cryptographic verification of Circle's Iris signature is mandatory prior to settlement.
+- The `(sourceDomain, burnTxHash)` pair is the idempotency key. Anchors MUST
+  persist it before crediting; a repeat MUST return the original receipt, never
+  re-mint (`ReplayTransferError` / `ALREADY_PROCESSED`).
+- A `submitted`-but-unconfirmed mint MUST be reconcilable via chain lookup
+  (`getTransaction`): `SUCCESS` → persist `settled`; anything else → allow retry.
+  Confirm-timeout windows MUST NOT wedge a hash permanently.
 
-### 4.3 Trustline Reserve Protection
-If the destination account lacks a USDC trustline:
-- Anchors MAY offer sponsored trustline creation.
-- Sponsoring transactions MUST enforce an explicit spending cap (default $\le 2\text{ XLM}$) to prevent wallet draining attacks.
+### 3.7 Trustlines
 
-### 4.4 Domain Allow-Listing
-To prevent unauthorized or fraudulent messages from experimental test networks, anchors MUST check incoming `sourceDomain` against the official allow-list of recognized domain IDs.
+- If the destination lacks a USDC trustline, anchors MAY create/sponsor one only
+  behind an explicit opt-in flag with a spending cap (default ≤ 2 XLM).
+- Never silent, never unbounded. Refusal MUST surface an actionable error, not a
+  hung transfer.
 
----
+## Design Rationale
 
-## 5. Backwards Compatibility
+- **`stellar.toml` over a new registry.** Wallets already resolve anchors via
+  SEP-1; a `[CCTP]` block reuses discovery, signing, and caching instead of
+  standing up parallel infrastructure.
+- **Exact ×10 math.** 6→7 scaling has no remainder, so the spec bans floats and
+  defines dust narrowly rather than inventing rounding policy where none is needed.
+- **Verify on-chain, check shape off-chain.** Iris payloads are HTTP data; only
+  the forwarder contract's authorization check is trustworthy. Off-chain code does
+  replay/allow-list/shape gating to fail fast, never to approve funds.
+- **Alternatives rejected:** per-anchor bespoke plumbing (status quo, N× cost);
+  SEP-6-only routing (forces interactive flows onto a headless transfer);
+  outbound scope (doubles threat surface; deferred to a later SEP).
 
-SEP-CCTP is fully backwards-compatible with existing Stellar Anchor standards:
-- **SEP-6 / SEP-24**: Anchors may utilize SEP-CCTP as an automated deposit rail under existing deposit endpoint flows (`/deposit`).
-- **SEP-38**: Anchors offering cross-asset exchange quotes may quote inbound CCTP USDC deposits directly to local fiat currencies.
+## Security Concerns
 
----
+- **Replay:** §3.6 persistent store; same burn never credits twice.
+- **Unverified credit:** no balance change or mint on non-`complete` or
+  malformed attestation. Testnet/mainnet base mismatch fails closed.
+- **Trustline draining:** opt-in + cap (§3.7).
+- **Domain spoofing:** `sourceDomain` checked against §3.4 registry; unknown
+  rejected explicitly.
+- **Secrets:** SDK never accepts/stores private keys; signing delegated to
+  caller callbacks or explicit sponsor env. Nothing secret in logs/errors.
+- **Audit status:** reference implementation has no third-party audit; this spec
+  is integration guidance, not custody-grade assurance.
 
-## 6. Reference Implementation
+## Changelog
 
-A reference TypeScript implementation of SEP-CCTP is provided in the open-source AnchorCCTP repository:
-- Core Engine: [`@anchor-cctp/core`](https://github.com/mothersgrace/anchorcctp-sdk)
-- Terminal Suite: [`@anchor-cctp/cli`](https://github.com/mothersgrace/anchorcctp-sdk)
+- `v0.0.1`: Initial draft.
