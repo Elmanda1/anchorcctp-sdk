@@ -101,6 +101,20 @@ export interface RedisLike {
   del?(key: string): Promise<unknown>;
 }
 
+/**
+ * Builds the KV client the stores in this file talk to.
+ *
+ * Every reader here `JSON.parse`s the exact string it wrote and guards with
+ * `typeof raw !== 'string'`. `@upstash/redis` **auto-deserializes JSON on `get`** by
+ * default, which hands those guards an already-parsed object: they reject it, the read
+ * returns `null`, and a write that succeeded is invisible to every subsequent read
+ * (intents, replay records and the fee cache alike). Disabling it makes `get` honour the
+ * raw-string contract `RedisLike` declares.
+ */
+export function createKvClient(url: string, token: string): RedisLike {
+  return new Redis({ url, token, automaticDeserialization: false }) as unknown as RedisLike;
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 export function normalizeReplayKey(burnTxHash: string): string {
@@ -624,7 +638,7 @@ export function depsFromEnv(env: Record<string, string | undefined>): EnvDeps {
     throw new Error('SOROBAN_RPC_URL is required in real mode (no Soroban transport to mint with).');
   }
 
-  const redis = new Redis({ url, token }) as unknown as RedisLike;
+  const redis = createKvClient(url, token);
   const horizon = new Horizon.Server(cold.horizonUrl);
   const networkPassphrase =
     cold.network === 'mainnet' ? Networks.PUBLIC : Networks.TESTNET;
