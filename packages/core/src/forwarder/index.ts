@@ -59,6 +59,25 @@ const DEFAULT_CONFIRM_POLL_MS = 3000;
  */
 const TX_VALIDITY_SECONDS = 180;
 
+/**
+ * Inclusion fee bid per operation, in stroops.
+ *
+ * The Stellar base fee is 100 stroops, but under surge pricing
+ * (`ledger_capacity_usage` above the 0.5 threshold) the fee a transaction must bid to
+ * be *includable at all* is `100 × (capacity / 0.5)`. Bidding the bare 100 while the
+ * requirement sits at 104 does not get the transaction rejected — `sendTransaction`
+ * still returns PENDING — the transaction simply can never be included, sits in the
+ * queue, and is evicted. It then reports `NOT_FOUND` from every provider with its
+ * sequence unconsumed, which is indistinguishable from "still pending" to the caller.
+ *
+ * Observed on mainnet at 0.52 capacity: required 104, bid 100, two mints vanished.
+ * `fee_stats.max_fee.p50` was 22,592 stroops, i.e. real bidders pay far more than the
+ * base fee. 100,000 (0.01 XLM) clears typical surge with room to spare and is
+ * negligible against a CCTP transfer; only the inclusion portion is spent, the
+ * resource fee is set from simulation.
+ */
+const INCLUSION_FEE_BID = '100000';
+
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const TESTNET_FORWARDER = 'CA66Q2WFBND6V4UEB7RD4SAXSVIWMD6RA4X3U32ELVFGXV5PJK4T4VSZ';
@@ -102,7 +121,7 @@ export function buildMintAndForwardXdr(params: MintParams): string {
       nativeToScVal(hexToBytes(params.signature)),
     );
     const tx = new TransactionBuilder(source, {
-      fee: '100',
+      fee: INCLUSION_FEE_BID,
       networkPassphrase: passphrase,
     })
       .addOperation(op)

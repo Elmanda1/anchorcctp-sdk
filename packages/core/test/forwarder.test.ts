@@ -136,6 +136,23 @@ describe('Forwarder & Address Translation', () => {
     expect(maxTime - Math.floor(Date.now() / 1000)).toBeGreaterThan(confirmWindowSeconds);
   });
 
+  it('bids above the bare base fee so surge pricing cannot make the tx unincludable', () => {
+    // Regression: bidding the 100-stroop base fee while surge requires
+    // 100 × (ledger_capacity_usage / 0.5) leaves the tx unincludable — accepted as
+    // PENDING, then evicted. It reports NOT_FOUND from every provider with its
+    // sequence unconsumed, which reads as "still pending" to the caller. Real
+    // mainnet bids sat at a p50 of 22,592 stroops.
+    const xdr = buildMintAndForwardXdr({
+      message: '0x' + 'ab'.repeat(40),
+      signature: '0x' + 'cd'.repeat(70),
+      sourceAccount: SOURCE,
+    });
+    const tx: any = (TransactionBuilder as any).fromXDR(xdr, 'TESTNET');
+
+    expect(Number(tx.fee)).toBeGreaterThan(100);
+    expect(Number(tx.fee)).toBeGreaterThan(10_000);
+  });
+
   it('submitMint passes real XDR to signer', async () => {
     let captured = '';
     const r = await submitMint(
