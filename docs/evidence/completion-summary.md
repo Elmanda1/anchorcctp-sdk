@@ -54,9 +54,7 @@ than rounding them up:
   every identifier in it was checked on 2026-10-02 and none existed, so the contents were
   deleted. What the mainnet leg must prove and how a reviewer checks it is specified in
   [the handoff brief](mainnet-e2e-handoff.md).
-- **The demo's live `stellar.toml` now carries mainnet values** ([L08](demo-deploy.md)).
-  Open: settle API unhealthy (`/api/config` → `FUNCTION_INVOCATION_FAILED`),
-  no mainnet transfer, no cancelled/credit screenshots.
+- **Open:** no mainnet transfer (skipped by builder decision), no cancelled/credit screenshots.
 - **`listen` is recorded with `--simulate`**, so its output shape is real but it is not a
   live Horizon stream ([L05](cli-listen.gif)).
 - **No captured Freighter session, and no `receive()` runtime stdout.** [L02](core-receive-sepolia.log)

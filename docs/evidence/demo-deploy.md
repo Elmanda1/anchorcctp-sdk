@@ -21,7 +21,7 @@
 | **USDC Issuer** | `GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN` |
 | **Dust Collector / Distribution** | `GAM2LT4MNPTLO6ODP5UEB2OTNJTEDSZRGVQG4354AUSFI27YOO5KHVES` (funded 6.68 XLM, USDC trustline live) |
 | **Fee Account** | `GAX2TZZKSHRVULE4XOYWPVGDUM2U2H7ETUHL23624I52DCFDKUFT7CE6` (funded 6.68 XLM, USDC trustline live) |
-| **API (`/api/*`)** | `FUNCTION_INVOCATION_FAILED` at last check — frontend + `stellar.toml` live, settle API not yet healthy |
+| **API (`/api/*`)** | Healthy: `/api/config` returns mainnet bundle, `/api/fees` quotes (verified 2026-10-02) |
 
 ---
 
@@ -56,5 +56,5 @@ above passes StrKey validation (checked pre-publish).
 - [x] Deposit lifecycle visualized (Burn → Attest → Settle) with poll, cancel/retry, and receipt (mint output, dust sweep, Stellar tx link).
 - [x] Error remediation surfaced from server `remediation` + simulated client paths (rejected signing, insufficient XLM, network mismatch) — see `ui-err-*.png`.
 - [x] `/.well-known/stellar.toml` and `/stellar.toml` served live with mainnet values.
-- [ ] Settle API healthy (`/api/config` JSON, no `FUNCTION_INVOCATION_FAILED`).
+- [x] Settle API healthy (`/api/config` JSON, `/api/fees` quoting — verified 2026-10-02).
 - [ ] Cancelled-state and final-credit screenshots (`ui-cancelled.png`, `ui-credit.png` still to capture).
