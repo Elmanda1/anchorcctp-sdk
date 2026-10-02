@@ -8,7 +8,7 @@ export const CodeSnippet: React.FC = () => {
 
 // 1. Initialize SDK with anchor configuration
 const cctp = createAnchorCCTP({
-  dustCollectorAddress: 'GDDUSTCOLLECTOR...',
+  dustCollectorAddress: 'GAM2LT4MNPTLO6ODP5UEB2OTNJTEDSZRGVQG4354AUSFI27YOO5KHVES', // anchor-owned sink, real G...
   trustline: { allowCreation: true, spendCapXlm: 2 }
 });
 
@@ -20,7 +20,7 @@ cctp.on('onSettled', (evt) => console.log('Settled on Stellar:', evt.amount, evt
 const result = await cctp.receive({
   sourceDomain: 0, // Ethereum
   burnTxHash: '0x9a8f4c2e...',
-  destinationAddress: 'GBBD47IF6LWK...'
+  destinationAddress: 'G...' // recipient Stellar account, never a USDC issuer
 });
 
 console.log('Credited Stellar Amount:', result.amount);`;

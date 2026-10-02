@@ -21,3 +21,4 @@ apps/demo/dist-server/
 apps/demo/data/
 apps/docs/.vitepress/cache/
 apps/docs/.vitepress/dist/
+.vercel

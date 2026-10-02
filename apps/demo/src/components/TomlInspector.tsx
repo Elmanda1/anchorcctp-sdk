@@ -20,9 +20,9 @@ cctp_forwarder = "${cfg.forwarderContractId}"
 [CCTP]
 CCTP_DOMAIN = 27
 FORWARDER_ADDRESS = "${cfg.forwarderContractId}"
-SUPPORTED_SOURCE_DOMAINS = [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 16, 18, 19, 21, 22, 25, 28, 29, 30, 31, 32, 37]
+SUPPORTED_SOURCE_DOMAINS = [0, 6]
 DUST_HANDLING = "collector_sweep"
-DUST_COLLECTOR_ACCOUNT = "GDDUSTCOLLECTOR00000000000000000000000000000000000000000000"
+DUST_COLLECTOR_ACCOUNT = "GAM2LT4MNPTLO6ODP5UEB2OTNJTEDSZRGVQG4354AUSFI27YOO5KHVES"
 `;
   } catch {
     tomlContent = '# Error: failed to load network config — check VITE_* env vars';

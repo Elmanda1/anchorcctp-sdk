@@ -60,7 +60,10 @@ import { createAnchorCCTP } from '@anchor-cctp/core-sdk';
 
 // 1. Instantiate the SDK client
 const cctp = createAnchorCCTP({
-  dustCollectorAddress: 'GDDUSTCOLLECTOR00000000000000000000000000000000000000000000',
+  // Anchor-owned sink for sub-stroop dust. Must be a real funded G...
+  // (mainnet example: 'GAM2LT4MNPTLO6ODP5UEB2OTNJTEDSZRGVQG4354AUSFI27YOO5KHVES').
+  // Placeholder StrKeys fail validation — never paste 'GDDUST...' style fillers.
+  dustCollectorAddress: 'GAM2LT4MNPTLO6ODP5UEB2OTNJTEDSZRGVQG4354AUSFI27YOO5KHVES',
   trustline: {
     allowCreation: true,
     spendCapXlm: 2,
@@ -80,7 +83,8 @@ cctp.on('onSettled', ({ amount, dust, txHash, destinationAddress }) => {
 const settlement = await cctp.receive({
   sourceDomain: 0, // Ethereum
   burnTxHash: '0x9a8f4c2e1b3d7a8c6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d',
-  destinationAddress: 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5',
+  // Recipient Stellar account — a real user G..., never a USDC issuer address.
+  destinationAddress: 'GAM2LT4MNPTLO6ODP5UEB2OTNJTEDSZRGVQG4354AUSFI27YOO5KHVES',
   amount: 100_000_000n, // 100 USDC (6-decimals)
 });
 
@@ -95,7 +99,7 @@ console.log('Stellar Credited Amount:', settlement.amount); // 1_000_000_000n st
 # Install globally or run with npx
 npm install -g @anchor-cctp/cli
 
-# 1. Generate stellar.toml CCTP configuration block
+# 1. Generate stellar.toml CCTP configuration block (testnet issuer shown; mainnet: GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN)
 anchor-cctp init --domain 27 --usdc-issuer GBBD47IF6... --output ./stellar.toml
 
 # 2. List supported CCTP domains
@@ -104,7 +108,7 @@ anchor-cctp domains
 # 3. Verify Iris attestation status for a source transaction hash
 anchor-cctp verify 0x9a8f4c...
 
-# 4. Stream real-time inbound CCTP transfers for a Stellar address (NDJSON)
+# 4. Stream real-time inbound CCTP transfers for a Stellar address (NDJSON; any G... account)
 anchor-cctp listen GBBD47IF6... --limit 10
 ```
 

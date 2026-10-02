@@ -35,6 +35,7 @@ npm install -g @anchor-cctp/cli
 Run the CLI `init` command to append CCTP capabilities to your anchor's `stellar.toml`:
 
 ```bash
+# Testnet issuer shown; mainnet: --usdc-issuer GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN
 anchor-cctp init \
   --domain 27 \
   --usdc-issuer GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5 \

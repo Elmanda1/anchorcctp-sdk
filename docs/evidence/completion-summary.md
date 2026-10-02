@@ -24,7 +24,7 @@ block and the `mint_and_forward` interface.
 |---|---|---|
 | D1 — Core SDK (`@anchor-cctp/core-sdk`), single `receive()` API | **Done** | npm package; coverage ([L01](coverage.md)); testnet settlement record ([L02](core-receive-sepolia.log)) |
 | D2 — CLI (`@anchor-cctp/cli`): `init`, `listen`, `verify`, `domains` | **Done, two named gaps** | npm package; recordings [L03](cli-domains.gif)–[L06](cli-verify.gif); `listen` recorded with `--simulate` ([L05](cli-listen.gif)); error-branch log predates 1.0.2 ([L07](cli-commands.log)) |
-| D3 — Demo anchor, Freighter UI, SEP-CCTP PR, walkthrough video | **Partial** | Portal + docs live ([L09](ui-demo-portal.png), [L10](ui-docs-site.png)); SEP PR [L12](sep-pr-link.md); 4:09 walkthrough video. Demo `stellar.toml` is placeholder ([L08](demo-deploy.md)); mainnet E2E not produced ([L13](mainnet-e2e.md)) |
+| D3 — Demo anchor, Freighter UI, SEP-CCTP PR, walkthrough video | **Partial** | Portal + docs live ([L09](ui-demo-portal.png), [L10](ui-docs-site.png)); live `stellar.toml` carries mainnet values ([L08](demo-deploy.md)); SEP PR [L12](sep-pr-link.md); 4:09 walkthrough video. Mainnet E2E not produced ([L13](mainnet-e2e.md)); settle API unhealthy; cancelled/credit shots pending |
 | Overall — completion summary + walkthrough video | Summary: this document. Video: [walkthrough](https://youtu.be/jTVbVezrICM) | — |
 
 ## What "done" means here
@@ -54,9 +54,9 @@ than rounding them up:
   every identifier in it was checked on 2026-10-02 and none existed, so the contents were
   deleted. What the mainnet leg must prove and how a reviewer checks it is specified in
   [the handoff brief](mainnet-e2e-handoff.md).
-- **The demo's live `stellar.toml` is placeholder** — its `DUST_COLLECTOR_ACCOUNT` fails
-  the CLI's own StrKey validator and its `SUPPORTED_SOURCE_DOMAINS` contains a
-  non-existent domain ([L08](demo-deploy.md)).
+- **The demo's live `stellar.toml` now carries mainnet values** ([L08](demo-deploy.md)).
+  Open: settle API unhealthy (`/api/config` → `FUNCTION_INVOCATION_FAILED`),
+  no mainnet transfer, no cancelled/credit screenshots.
 - **`listen` is recorded with `--simulate`**, so its output shape is real but it is not a
   live Horizon stream ([L05](cli-listen.gif)).
 - **No captured Freighter session, and no `receive()` runtime stdout.** [L02](core-receive-sepolia.log)
