@@ -1,6 +1,7 @@
 // apps/demo/server/handlers.test.ts
 // Framework-free handler + KV store tests. Fake in-memory KV mirrors kv.ts.
 import { describe, it, expect } from 'vitest';
+import { Keypair } from '@stellar/stellar-sdk';
 import {
   buildCsp,
   CSP,
@@ -1382,6 +1383,30 @@ describe('assertColdStartEnv', () => {
 
   it('depsFromEnv refuses to build serverless deps without KV credentials', () => {
     expect(() => depsFromEnv(base)).toThrow(/KV_REST_API_URL/);
+  });
+
+  it('allows the stable production origin, not only the per-deployment VERCEL_URL', () => {
+    // Regression: an allowlist built from VERCEL_URL alone holds a hostname that
+    // changes every deploy and is never where the site is served, so the production
+    // browser 403s against its own API.
+    const kp = Keypair.fromRawEd25519Seed(Buffer.alloc(32, 7));
+    const deps = depsFromEnv({
+      STELLAR_NETWORK: 'mainnet',
+      STELLAR_DESTINATION: kp.publicKey(),
+      STELLAR_SECRET: kp.secret(),
+      USDC_ISSUER: 'GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN',
+      FORWARDER_CONTRACT_ID: 'CBZL2IH7F6BIDAA3WBNXYKIXSATJGMSW7K5P5MJ6STX5RXN47TZJDF5T',
+      HORIZON_URL: 'https://horizon.stellar.org',
+      SOROBAN_RPC_URL: 'https://soroban-mainnet.stellar.org',
+      CIRCLE_ATTESTATION_BASE_URL: 'https://iris-api.circle.com',
+      KV_REST_API_URL: 'https://example.upstash.io',
+      KV_REST_API_TOKEN: 'token',
+      VERCEL_URL: 'anchorcctp-sdk-demo-21bjdrkau-elmandas-projects.vercel.app',
+      VERCEL_PROJECT_PRODUCTION_URL: 'www.anchorcctp.dev',
+    });
+
+    expect(deps.allowedOrigins).toContain('https://www.anchorcctp.dev');
+    expect(deps.allowedOrigins).toContain('https://anchorcctp-sdk-demo-21bjdrkau-elmandas-projects.vercel.app');
   });
 
   it('pins the settle attestation budget well inside the Hobby 300s invocation', () => {

@@ -638,7 +638,13 @@ export function depsFromEnv(env: Record<string, string | undefined>): EnvDeps {
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);
+  // VERCEL_URL is the per-deployment hostname — it changes on every deploy and is
+  // never the domain the site is served from, so an allowlist built from it alone
+  // 403s the production browser. VERCEL_PROJECT_PRODUCTION_URL is the stable one.
   if (env.VERCEL_URL) origins.push(`https://${env.VERCEL_URL}`);
+  if (env.VERCEL_PROJECT_PRODUCTION_URL) {
+    origins.push(`https://${env.VERCEL_PROJECT_PRODUCTION_URL}`);
+  }
 
   return {
     intents: new KvIntentStore(redis),
