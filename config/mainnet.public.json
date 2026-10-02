@@ -1,0 +1,33 @@
+{
+  "network": "mainnet",
+  "horizonUrl": "https://horizon.stellar.org",
+  "sorobanRpcUrl": "https://soroban-mainnet.stellar.org",
+  "attestationBaseUrl": "https://iris-api.circle.com",
+  "attestationV2Pattern": "GET {base}/v2/messages/{sourceDomain}?transactionHash=0x...",
+  "forwarderContractId": "CBZL2IH7F6BIDAA3WBNXYKIXSATJGMSW7K5P5MJ6STX5RXN47TZJDF5T",
+  "usdcIssuer": "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN",
+  "distributionAddress": "GAM2LT4MNPTLO6ODP5UEB2OTNJTEDSZRGVQG4354AUSFI27YOO5KHVES",
+  "feeAddress": "GAX2TZZKSHRVULE4XOYWPVGDUM2U2H7ETUHL23624I52DCFDKUFT7CE6",
+  "dustCollectorAddress": "GAM2LT4MNPTLO6ODP5UEB2OTNJTEDSZRGVQG4354AUSFI27YOO5KHVES",
+  "destinationDomain": 27,
+  "supportedSourceDomains": [
+    0,
+    6
+  ],
+  "evm": {
+    "ethereum": {
+      "domain": 0,
+      "chainId": 1,
+      "tokenMessengerV2": "0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d",
+      "messageTransmitterV2": "0x81D40F21F12A8F0E3252Bccb954D722d4c464B64",
+      "usdc": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    "base": {
+      "domain": 6,
+      "chainId": 8453,
+      "tokenMessengerV2": "0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d",
+      "messageTransmitterV2": "0x81D40F21F12A8F0E3252Bccb954D722d4c464B64",
+      "usdc": "0x833589fCD6eDb6E08f4c7C32D4f71b54bda02913"
+    }
+  }
+}
