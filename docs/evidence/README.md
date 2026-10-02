@@ -40,7 +40,7 @@ but does not yet support the claim; the gap is named in the status column.
 | L10 | The documentation site is live | [ui-docs-site.png](ui-docs-site.png) | Open https://anchorcctp.dev/docs/overview/what | **Real as a screenshot of the live page** |
 | L11 | The demo UI refreshes balances and surfaces real wallet errors | [ui-balance-refresh.md](ui-balance-refresh.md) | Run `npm run dev:demo`, connect Freighter, then exercise each error option | **Partial.** Real for typecheck, lint, test, and build; the manual browser steps still need a rerun |
 | L12 | A SEP-CCTP draft is open against `stellar/stellar-protocol` | [sep-pr-link.md](sep-pr-link.md) | Open https://github.com/stellar/stellar-protocol/pull/2031 | **Real.** Open, draft, authored by `@Dyjuen` |
-| L13 | A mainnet transfer settles | [mainnet-e2e.md](mainnet-e2e.md) | Look up the burn hash on Etherscan and the mint hash on Stellar Expert | **Gap — do not cite.** Placeholder data with no on-chain receipt: the burn hash is a sequential hex pattern and the video URL does not resolve. Replace with real receipts or drop the file |
+| L13 | A mainnet transfer settles | [mainnet-e2e.md](mainnet-e2e.md) — template, not a record | — | **Not yet produced.** The fabricated contents were deleted on 2026-10-02; what remains is an empty template. What the mainnet leg has to prove, and how a reviewer checks it, is specified in [mainnet-e2e-handoff.md](mainnet-e2e-handoff.md) |
 | L14 | The evidence package is indexed | this file | — | **Real** |
 
 ## Not yet covered
@@ -51,6 +51,7 @@ but does not yet support the claim; the gap is named in the status column.
 | One-page completion summary document | Not written |
 | Two-minute walkthrough video | Not recorded |
 | `receive()` runtime log produced by the SDK itself | L02 is a verification record re-derived from public APIs, not captured stdout of one `receive()` call |
+| Mainnet end-to-end record | Not produced. The brief for the mainnet leg — what to prove, the environment, the `testnet-auto.ts` mainnet gate, and an acceptance checklist — is [mainnet-e2e-handoff.md](mainnet-e2e-handoff.md) |
 
 ## External links
 
