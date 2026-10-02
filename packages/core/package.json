@@ -1,6 +1,6 @@
 {
   "name": "@anchor-cctp/core-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AnchorCCTP SDK Core Engine — accept USDC from any CCTP-connected chain on Stellar with a single function call.",
   "main": "./dist/index.js",
   "module": "./dist/esm/index.js",
@@ -20,13 +20,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Dyjuen/anchorcctp-sdk.git",
+    "url": "git+https://github.com/Elmanda1/anchorcctp-sdk.git",
     "directory": "packages/core"
   },
   "bugs": {
-    "url": "https://github.com/Dyjuen/anchorcctp-sdk/issues"
+    "url": "https://github.com/Elmanda1/anchorcctp-sdk/issues"
   },
-  "homepage": "https://github.com/Dyjuen/anchorcctp-sdk#readme",
+  "homepage": "https://github.com/Elmanda1/anchorcctp-sdk#readme",
   "scripts": {
     "build:cjs": "tsc -p tsconfig.json",
     "build:esm": "tsc -p tsconfig.esm.json && node -e \"require('fs').writeFileSync('dist/esm/package.json', JSON.stringify({type:'module'}))\"",

@@ -7,8 +7,9 @@ import {
 import { FileReplayStore } from '../src/replay/file-store.js';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 
-const TMP_DIR = '/tmp/opencode';
+const TMP_DIR = path.join(os.tmpdir(), 'opencode');
 
 describe('Replay Guard & Idempotency Store', () => {
   it('marks and checks processed transactions in memory', async () => {
@@ -75,6 +76,7 @@ describe('FileReplayStore', () => {
   const storePath = path.join(TMP_DIR, 'replay-test.json');
 
   beforeEach(() => {
+    fs.mkdirSync(TMP_DIR, { recursive: true });
     try { fs.unlinkSync(storePath); } catch { /* ok */ }
     try { fs.unlinkSync(storePath + '.tmp'); } catch { /* ok */ }
   });
@@ -103,7 +105,10 @@ describe('FileReplayStore', () => {
     expect(await s.getRecord(upper)).not.toBeNull();
   });
 
-  it('writes file with restricted permissions', async () => {
+  // Windows ignores POSIX file modes, so this assertion only holds on POSIX hosts.
+  const itPosix = process.platform === 'win32' ? it.skip : it;
+
+  itPosix('writes file with restricted permissions', async () => {
     const adapter = new FileReplayStore(storePath);
     const s = new ReplayStore(adapter);
     await s.markProcessed('0x' + 'bb'.repeat(32), { burnTxHash: '0x' + 'bb'.repeat(32), txHash: 'T2' });
