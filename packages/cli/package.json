@@ -1,6 +1,6 @@
 {
   "name": "@anchor-cctp/cli",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "AnchorCCTP CLI — terminal command suite for Stellar anchor CCTP integration",
   "main": "./dist/index.js",
   "bin": {
@@ -8,13 +8,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Dyjuen/anchorcctp-sdk.git",
+    "url": "git+https://github.com/Elmanda1/anchorcctp-sdk.git",
     "directory": "packages/cli"
   },
   "bugs": {
-    "url": "https://github.com/Dyjuen/anchorcctp-sdk/issues"
+    "url": "https://github.com/Elmanda1/anchorcctp-sdk/issues"
   },
-  "homepage": "https://github.com/Dyjuen/anchorcctp-sdk#readme",
+  "homepage": "https://github.com/Elmanda1/anchorcctp-sdk#readme",
   "scripts": {
     "build": "tsc",
     "test": "jest"
@@ -34,7 +34,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@anchor-cctp/core-sdk": "1.0.0"
+    "@anchor-cctp/core-sdk": "^1.0.1"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
