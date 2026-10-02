@@ -1,10 +1,10 @@
 # @anchor-cctp/core-sdk
 
-> Production-ready TypeScript core engine for Stellar Anchors & Wallets to ingest cross-chain USDC from 23+ CCTP-connected blockchains via a single unified API call.
+> Production-ready TypeScript core engine for Stellar Anchors & Wallets to ingest cross-chain USDC from 29 CCTP-connected blockchains via a single unified API call.
 
 [![npm version](https://img.shields.io/npm/v/@anchor-cctp/core-sdk.svg)](https://www.npmjs.com/package/@anchor-cctp/core-sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Coverage Status](https://img.shields.io/badge/coverage-98.49%25-brightgreen.svg)](docs/evidence/test-coverage-report.md)
+[![Coverage Status](https://img.shields.io/badge/coverage-96.48%25-brightgreen.svg)](../../docs/evidence/coverage.md)
 
 ---
 
@@ -196,7 +196,7 @@ try {
 - **Attestation Gate**: Mandatory cryptographic verification of Iris attestation signatures before contract interaction.
 - **Replay Store**: Atomic check-and-set idempotency store ensures $|R(H)| \le 1$ for any transaction hash $H$.
 
-For formal mathematical proofs, see [LOGIC_PROOF.md](../../LOGIC_PROOF.md) and [Test Coverage Report](../../docs/evidence/test-coverage-report.md).
+For formal mathematical proofs, see [LOGIC_PROOF.md](../../LOGIC_PROOF.md) and [Test Coverage Report](../../docs/evidence/coverage.md).
 
 ---
 

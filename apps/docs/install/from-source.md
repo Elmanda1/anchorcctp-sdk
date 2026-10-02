@@ -3,7 +3,7 @@
 For contributors: run the monorepo locally.
 
 ```bash
-git clone https://github.com/Dyjuen/anchorcctp-sdk.git
+git clone https://github.com/Elmanda1/anchorcctp-sdk.git
 cd anchorcctp-sdk
 npm install
 npm run build
