@@ -13,7 +13,7 @@
 | **File** | `ecosystem/sep_cctp_inbound_deposits.md` |
 | **Pull Request Title** | `Draft SEP: CCTP inbound deposits for Stellar anchors` |
 | **Pull Request URL** | `https://github.com/stellar/stellar-protocol/pull/2031` |
-| **Status** | Open (Draft, SEP number To Be Assigned) |
+| **Status** | Open, awaiting a maintainer's review (draft proposal; SEP number to be assigned). GitHub reports the PR as non-draft. |
 | **Author** | Juen (`@Dyjuen`) |
 | **Discussion** | `https://github.com/orgs/stellar/discussions/2032` (`[Pre-SEP] CCTP inbound deposits for Stellar anchors`) |
 

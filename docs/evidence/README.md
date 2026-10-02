@@ -39,16 +39,16 @@ but does not yet support the claim; the gap is named in the status column.
 | L09 | The demo portal renders the deposit flow | [ui-demo-portal.png](ui-demo-portal.png) | Open https://anchorcctp.dev | **Real as a screenshot of the live page.** It is the portal itself, including the three-step `Pick a domain` / `Burn & send` / `Receive USDC` panels. It is not a captured Freighter session |
 | L10 | The documentation site is live | [ui-docs-site.png](ui-docs-site.png) | Open https://anchorcctp.dev/docs/overview/what | **Real as a screenshot of the live page** |
 | L11 | The demo UI refreshes balances and surfaces real wallet errors | [ui-balance-refresh.md](ui-balance-refresh.md) | Run `npm run dev:demo`, connect Freighter, then exercise each error option | **Partial.** Real for typecheck, lint, test, and build; the manual browser steps still need a rerun |
-| L12 | A SEP-CCTP draft is open against `stellar/stellar-protocol` | [sep-pr-link.md](sep-pr-link.md) | Open https://github.com/stellar/stellar-protocol/pull/2031 | **Real.** Open, draft, authored by `@Dyjuen` |
+| L12 | A SEP-CCTP draft is open against `stellar/stellar-protocol` | [sep-pr-link.md](sep-pr-link.md) | Open https://github.com/stellar/stellar-protocol/pull/2031 | **Real.** Open, authored by `@Dyjuen`. A draft *proposal*; GitHub reports it as a non-draft PR, so describe it as open, awaiting a maintainer's review |
 | L13 | A mainnet transfer settles | [mainnet-e2e.md](mainnet-e2e.md) — template, not a record | — | **Not yet produced.** The fabricated contents were deleted on 2026-10-02; what remains is an empty template. What the mainnet leg has to prove, and how a reviewer checks it, is specified in [mainnet-e2e-handoff.md](mainnet-e2e-handoff.md) |
 | L14 | The evidence package is indexed | this file | — | **Real** |
+| L15 | A one-page completion summary exists, with its gaps named | [completion-summary.md](completion-summary.md) | Open the file; every claim links into this index | **Real.** Each claim maps to an L-item above; the gaps in this table are restated in it, not hidden |
 
 ## Not yet covered
 
 | Deliverable item | Status |
 |---|---|
 | Freighter screenshots for each transfer step and each error case | Not captured. L09/L10 show the portal and docs pages; no screenshot shows a connected Freighter session, a signing rejection, an insufficient-XLM state, or a network-mismatch error |
-| One-page completion summary document | Not written |
 | Two-minute walkthrough video | Not recorded |
 | `receive()` runtime log produced by the SDK itself | L02 is a verification record re-derived from public APIs, not captured stdout of one `receive()` call |
 | Mainnet end-to-end record | Not produced. The brief for the mainnet leg — what to prove, the environment, the `testnet-auto.ts` mainnet gate, and an acceptance checklist — is [mainnet-e2e-handoff.md](mainnet-e2e-handoff.md) |
