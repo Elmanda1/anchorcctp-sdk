@@ -501,8 +501,18 @@ export class RedisFeeCache implements FeeCache {
 
 // ─── Cold-start env enforcement ──────────────────────────────────────────────
 
+/**
+ * SDF publishes no mainnet Soroban RPC under `*.stellar.org`: the testnet name
+ * resolves, the mainnet one returns NXDOMAIN. Stellar's RPC-providers page names
+ * `https://mainnet.sorobanrpc.com` as the publicly accessible mainnet endpoint, so
+ * without it this allowlist can never be satisfied on mainnet at all. Third-party
+ * hosts are admitted by **exact name only** — no suffix wildcard, so a lookalike
+ * domain (`mainnet.sorobanrpc.com.evil.example`) cannot slip through.
+ */
+const PINNED_RPC_HOSTS: ReadonlySet<string> = new Set(['mainnet.sorobanrpc.com']);
+
 const STELLAR_HOST_OK = (host: string): boolean =>
-  host.endsWith('.stellar.org') || host === 'localhost';
+  host.endsWith('.stellar.org') || host === 'localhost' || PINNED_RPC_HOSTS.has(host);
 
 function requireHttpsUrl(
   name: string,
@@ -518,7 +528,9 @@ function requireHttpsUrl(
     throw new Error(`${name} is not a valid URL: "${value}".`);
   }
   if (!allowlist(host)) {
-    throw new Error(`${name} host "${host}" is not in the allowlist (*.stellar.org or localhost).`);
+    throw new Error(
+      `${name} host "${host}" is not in the allowlist (*.stellar.org, localhost, or a pinned public RPC host).`,
+    );
   }
   return value;
 }

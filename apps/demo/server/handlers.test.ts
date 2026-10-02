@@ -1381,6 +1381,27 @@ describe('assertColdStartEnv', () => {
       .toThrow(/https/);
   });
 
+  it('admits the documented public mainnet Soroban RPC by exact name', () => {
+    // SDF publishes no mainnet Soroban RPC under *.stellar.org (soroban-mainnet.stellar.org
+    // is NXDOMAIN), so without a pinned host this check could never pass on mainnet and
+    // every cold start threw — taking the config, fees, initiate and settle routes down.
+    const mainnet = {
+      STELLAR_NETWORK: 'mainnet',
+      STELLAR_DESTINATION: G,
+      HORIZON_URL: 'https://horizon.stellar.org',
+      CIRCLE_ATTESTATION_BASE_URL: 'https://iris-api.circle.com',
+    };
+
+    expect(() => assertColdStartEnv({ ...mainnet, SOROBAN_RPC_URL: 'https://mainnet.sorobanrpc.com' }))
+      .not.toThrow();
+
+    // Exact name only — neither a suffix nor a prefix lookalike may pass.
+    expect(() => assertColdStartEnv({ ...mainnet, SOROBAN_RPC_URL: 'https://mainnet.sorobanrpc.com.evil.example' }))
+      .toThrow(/SOROBAN_RPC_URL/);
+    expect(() => assertColdStartEnv({ ...mainnet, SOROBAN_RPC_URL: 'https://evil-mainnet.sorobanrpc.com' }))
+      .toThrow(/SOROBAN_RPC_URL/);
+  });
+
   it('depsFromEnv refuses to build serverless deps without KV credentials', () => {
     expect(() => depsFromEnv(base)).toThrow(/KV_REST_API_URL/);
   });
