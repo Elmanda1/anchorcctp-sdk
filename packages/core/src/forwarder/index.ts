@@ -44,6 +44,21 @@ export interface MintConfirmOptions {
 const DEFAULT_CONFIRM_ATTEMPTS = 20;
 const DEFAULT_CONFIRM_POLL_MS = 3000;
 
+/**
+ * How long the assembled mint transaction stays valid.
+ *
+ * This **must** outlive the confirmation window below
+ * (`DEFAULT_CONFIRM_ATTEMPTS × DEFAULT_CONFIRM_POLL_MS` = 60s). At 30s a transaction
+ * that was merely slow to be included expired (`txTOO_LATE`) and was dropped with its
+ * sequence unconsumed, while `submitMint` kept polling for another 30s and finally
+ * reported `MINT_UNCONFIRMED` for a transaction that could never confirm.
+ *
+ * Observed on mainnet: the broadcast hash was absent from both Horizon and Soroban
+ * RPC, and the sponsor's sequence had not advanced — the signature of an expiry, not
+ * of a pending transaction.
+ */
+const TX_VALIDITY_SECONDS = 180;
+
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const TESTNET_FORWARDER = 'CA66Q2WFBND6V4UEB7RD4SAXSVIWMD6RA4X3U32ELVFGXV5PJK4T4VSZ';
@@ -91,7 +106,7 @@ export function buildMintAndForwardXdr(params: MintParams): string {
       networkPassphrase: passphrase,
     })
       .addOperation(op)
-      .setTimeout(30)
+      .setTimeout(TX_VALIDITY_SECONDS)
       .build();
     return tx.toXDR();
   } catch (err) {

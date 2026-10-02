@@ -117,6 +117,25 @@ describe('Forwarder & Address Translation', () => {
     expect(parsed.source).toBe(SOURCE);
   });
 
+  it('keeps the mint transaction valid beyond the confirmation window', () => {
+    // Regression: setTimeout(30) expired the tx before submitMint's poll window
+    // (DEFAULT_CONFIRM_ATTEMPTS × DEFAULT_CONFIRM_POLL_MS = 20 × 3000ms = 60s) could
+    // finish. A tx that was slow to be included then died with txTOO_LATE — dropped,
+    // its sequence never consumed — and was reported as MINT_UNCONFIRMED even though
+    // it could never confirm. The validity window must outlive the poll window.
+    const xdr = buildMintAndForwardXdr({
+      message: '0x' + 'ab'.repeat(40),
+      signature: '0x' + 'cd'.repeat(70),
+      sourceAccount: SOURCE,
+    });
+    const tx: any = (TransactionBuilder as any).fromXDR(xdr, 'TESTNET');
+    const confirmWindowSeconds = (20 * 3000) / 1000;
+    const maxTime = Number(tx.timeBounds?.maxTime ?? 0);
+
+    expect(maxTime).toBeGreaterThan(0);
+    expect(maxTime - Math.floor(Date.now() / 1000)).toBeGreaterThan(confirmWindowSeconds);
+  });
+
   it('submitMint passes real XDR to signer', async () => {
     let captured = '';
     const r = await submitMint(
