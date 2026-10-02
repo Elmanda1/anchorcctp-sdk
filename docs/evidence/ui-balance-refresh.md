@@ -1,7 +1,7 @@
 # Demo UI: Balance Refresh and Error Simulation Panel
 
 **Date:** 2026-10-02
-**Package versions:** `@anchor-cctp/core-sdk@1.0.1`, `@anchor-cctp/cli@1.0.1` (demo workspace `apps/demo`)
+**Package versions:** `@anchor-cctp/core-sdk@1.0.1` (demo workspace `apps/demo`, which does not depend on the CLI package)
 **Status:** Done
 
 ## What Changed

@@ -38,8 +38,8 @@ item: two real USDC burns on Base Sepolia (domain 6) attested by Circle Iris as
 the forwarder's own `mint_and_forward` event — not from the target's claim of success.
 Coverage ([L01](coverage.md), measured 2026-10-02) is 31 suites / 364 specs; core 96.48%
 lines and 91.49% branches, CLI 100% lines and 94.07% branches. The published packages
-were exercised as published: the CLI recordings run `npx @anchor-cctp/cli@1.0.1`
-(`verify` at `1.0.2`), not a local build.
+were exercised as published: every CLI recording runs `npx @anchor-cctp/cli@1.0.2`,
+not a local build.
 
 ## What is deliberately not claimed
 

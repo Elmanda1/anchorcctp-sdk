@@ -4,12 +4,14 @@ Every claim in the report maps to one numbered proof below. File names are stabl
 re-recording an artifact overwrites the file in place, so the links never change.
 Dates and versions live inside each file and in git history.
 
-Package versions covered: `@anchor-cctp/core-sdk@1.0.1`; `@anchor-cctp/cli@1.0.1` for
-the `domains`, `init`, and `listen` recordings, and `@anchor-cctp/cli@1.0.2`
-(published 2026-10-02) for `verify`. `1.0.2` fixes two defects in `1.0.1`: the version
-banner was hardcoded to `v1.0.0`, and a successful `verify` exited `127` on Windows
-with a libuv assertion (`!(handle->flags & UV_HANDLE_CLOSING), src\win\async.c`)
-because `process.exit()` raced a pending `AbortSignal.timeout()` handle.
+Package versions covered: `@anchor-cctp/core-sdk@1.0.1` and `@anchor-cctp/cli@1.0.2`.
+Every CLI recording (`domains`, `init`, `listen`, `verify`) and the
+[cli-commands.log](cli-commands.log) capture were re-recorded at `cli@1.0.2`
+(published 2026-10-02), so the command lines below all read `@1.0.2`. `1.0.2` fixes two
+defects in `1.0.1`: the version banner was hardcoded to `v1.0.0`, and a successful
+`verify` exited `127` on Windows with a libuv assertion
+(`!(handle->flags & UV_HANDLE_CLOSING), src\win\async.c`) because `process.exit()`
+raced a pending `AbortSignal.timeout()` handle.
 
 Status legend: **Real** = independently reproducible. **Gap** = the artifact exists
 but does not yet support the claim; the gap is named in the status column.
@@ -25,10 +27,10 @@ but does not yet support the claim; the gap is named in the status column.
 
 | ID | Claim | Evidence | How to verify | Status |
 |---|---|---|---|---|
-| L03 | `domains` lists supported CCTP domains with chain names and IDs | [cli-domains.gif](cli-domains.gif), [cli-commands.log](cli-commands.log) | Run `npx @anchor-cctp/cli@1.0.1 domains` in an empty directory and compare | **Real.** 30 domains, `0` ethereum → `37` X Layer, `27` stellar |
-| L04 | `init` generates a CCTP block for `stellar.toml` | [cli-init.gif](cli-init.gif) | Run `npx @anchor-cctp/cli@1.0.1 init --domain 27 --usdc-issuer <G...> --output ./stellar.toml` | **Real.** Emits `cctp_domain`, `FORWARDER_ADDRESS`, `SUPPORTED_SOURCE_DOMAINS` (29 entries) |
-| L05 | `listen` polls inbound transfers and logs source chain, amount, status | [cli-listen.gif](cli-listen.gif) | Run `npx @anchor-cctp/cli@1.0.1 listen <G...> --simulate --limit 2` | **Gap.** Output shape is real, but the run uses `--simulate`; this is not a live Horizon stream |
-| L06 | `verify` returns the attestation for a burn | [cli-verify.gif](cli-verify.gif) | Run `npx @anchor-cctp/cli@1.0.2 verify 0xffaa63b3… --source-domain 6 --testnet` | **Real.** `attested: true`, `status: complete`, against a completed Base Sepolia burn |
+| L03 | `domains` lists supported CCTP domains with chain names and IDs | [cli-domains.gif](cli-domains.gif), [cli-commands.log](cli-commands.log) | Run `npx @anchor-cctp/cli@1.0.2 domains` in an empty directory and compare | **Real.** 30 domains, `0` ethereum → `37` X Layer, `27` stellar |
+| L04 | `init` generates a CCTP block for `stellar.toml` | [cli-init.gif](cli-init.gif) | Run `npx @anchor-cctp/cli@1.0.2 init --domain 27 --usdc-issuer <G...> --output ./stellar.toml` | **Real.** Emits `cctp_domain`, `FORWARDER_ADDRESS`, `SUPPORTED_SOURCE_DOMAINS` (29 entries) |
+| L05 | `listen` polls inbound transfers and logs source chain, amount, status | [cli-listen.gif](cli-listen.gif) | Run `npx @anchor-cctp/cli@1.0.2 listen <G...> --simulate --limit 2` | **Gap.** Output shape is real, but the run uses `--simulate`; this is not a live Horizon stream |
+| L06 | `verify` returns the attestation for a burn | [cli-verify.gif](cli-verify.gif) | Run `npx @anchor-cctp/cli@1.0.2 verify 0x39e8bd0cdb0326d2847391e2abf7cd3573a59110f25c0c86f64b7dd7acad2acd --source-domain 6 --testnet` | **Real.** `attested: true`, `status: complete`, against a completed Base Sepolia burn |
 | L07 | All commands emit schema-conforming JSON with `code` + `remediation` on error | [cli-commands.log](cli-commands.log) | Re-run any §5/§6/§8 command from the log; each exits 1 | **Real.** Re-recorded 2026-10-02 on CLI 1.0.2: `domains` (30 entries), `init` (current `CA66…` forwarder, 29 source domains, dust line only with `--dust-collector`), live `verify` against completed Base Sepolia burn (`attested: true`), `listen --simulate` shape, plus three error branches (`INVALID_HASH`, `INVALID_DOMAIN`, `INVALID_ARGUMENT`) each exit 1 |
 
 ## Deliverable 3 — Demo anchor & SEP-CCTP
