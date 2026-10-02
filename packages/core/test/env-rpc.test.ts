@@ -44,6 +44,53 @@ describe('createSorobanTransport', () => {
     expect(server.getTransaction).toHaveBeenCalledWith('abc123');
   });
 
+  it('reads status raw when the SDK cannot decode a successful transaction', async () => {
+    // @stellar/stellar-sdk 13.3.0 throws `Bad union switch: 4` decoding the
+    // TransactionMeta of a current-network Soroban tx — *even when it succeeded*.
+    // submitMint's poll catches that as NOT_FOUND, so every confirmed mint looked
+    // unconfirmed and the receipt was never written.
+    const server = {
+      serverURL: 'https://rpc.example/',
+      getTransaction: jest.fn(async () => {
+        throw new Error('Bad union switch: 4');
+      }),
+    } as unknown as rpc.Server;
+    const transport = createSorobanTransport(server, Networks.TESTNET);
+
+    const original = globalThis.fetch;
+    globalThis.fetch = jest.fn(async () => ({
+      ok: true,
+      json: async () => ({ result: { status: 'SUCCESS' } }),
+    })) as unknown as typeof fetch;
+    try {
+      await expect(transport.getTransaction('abc123')).resolves.toEqual({ status: 'SUCCESS' });
+    } finally {
+      globalThis.fetch = original;
+    }
+  });
+
+  it('rethrows the decode error when the raw read cannot answer either', async () => {
+    // An unreachable RPC is not evidence that the mint failed — keep the original error
+    // so the caller still reports "unconfirmed" rather than inventing a status.
+    const server = {
+      serverURL: 'https://rpc.example/',
+      getTransaction: jest.fn(async () => {
+        throw new Error('Bad union switch: 4');
+      }),
+    } as unknown as rpc.Server;
+    const transport = createSorobanTransport(server, Networks.TESTNET);
+
+    const original = globalThis.fetch;
+    globalThis.fetch = jest.fn(async () => {
+      throw new Error('network down');
+    }) as unknown as typeof fetch;
+    try {
+      await expect(transport.getTransaction('abc123')).rejects.toThrow('Bad union switch: 4');
+    } finally {
+      globalThis.fetch = original;
+    }
+  });
+
   it('assembles through rpc.assembleTransaction (a bogus sim response cannot assemble)', () => {
     const kp = Keypair.random();
     const transport = createSorobanTransport(

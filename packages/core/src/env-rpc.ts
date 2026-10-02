@@ -40,10 +40,53 @@ export function createSorobanTransport(
       return { status: sent.status, hash: sent.hash };
     },
     getTransaction: async (hash) => {
-      const got = await server.getTransaction(hash);
-      return { status: got.status };
+      try {
+        const got = await server.getTransaction(hash);
+        return { status: got.status };
+      } catch (error) {
+        // An SDK older than the network's XDR throws while *decoding a transaction
+        // that succeeded* (see `rawTransactionStatus`). That is a decode failure, not
+        // a missing transaction, and treating it as one makes every confirmed mint
+        // look unconfirmed forever. Read the status straight from the RPC instead.
+        const status = await rawTransactionStatus(server, hash);
+        if (status === undefined) throw error;
+        return { status };
+      }
     },
   };
+}
+
+/**
+ * Reads a transaction's `status` directly from Soroban RPC, bypassing the SDK's decoder.
+ *
+ * `@stellar/stellar-sdk@13.3.0` cannot decode the `TransactionMeta` a current-network
+ * Soroban transaction returns — the XDR union has a case its schema predates, so
+ * `server.getTransaction()` throws `Bad union switch: 4` **for a transaction that
+ * succeeded**. `submitMint`'s confirmation poll catches that as `NOT_FOUND` and never
+ * observes SUCCESS, so a mint that landed is reported as `MINT_UNCONFIRMED` — observed
+ * on mainnet 2026-10-02, where the mint was on chain and the portal still refused it.
+ *
+ * The poll only needs `status`, so read that one field. Returns `undefined` when the RPC
+ * is unreachable or answers without a status, letting the caller keep the original error.
+ */
+async function rawTransactionStatus(
+  server: rpc.Server,
+  hash: string,
+): Promise<string | undefined> {
+  const url = String(server.serverURL ?? '');
+  if (!url) return undefined;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'getTransaction', params: { hash } }),
+    });
+    if (!res.ok) return undefined;
+    const body = (await res.json()) as { result?: { status?: unknown } };
+    return typeof body?.result?.status === 'string' ? body.result.status : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /** Horizon surface the trustline provider needs — narrow so tests can fake it. */
