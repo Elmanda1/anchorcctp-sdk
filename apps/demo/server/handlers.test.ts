@@ -777,6 +777,75 @@ describe('handleSettle', () => {
     expect(bodyOf(second).error).toMatchObject({ code: 'MINT_UNCONFIRMED' });
   });
 
+  it('reconciles a broadcast record against the chain once the mint lands', async () => {
+    const deps = fakeDeps();
+    deps.cctp = {
+      receive: async () => {
+        throw new MintUnconfirmedError(HASH, 'BROADCAST_TX');
+      },
+    } as never;
+
+    // First attempt: broadcast, and the polling window closed before it confirmed.
+    const first = await handleSettle(settleBody(), deps);
+    expect(first.status).toBe(502);
+    expect(await deps.replay.getRecord(HASH)).toMatchObject({
+      status: 'submitted',
+      txHash: 'BROADCAST_TX',
+    });
+
+    // The mint lands after the window closes. The next attempt must ask the chain
+    // instead of refusing forever — refusing is what left a settled mainnet transfer
+    // recorded as a failure, with no receipt and `status` answering `ready`.
+    deps.settleTransport = {
+      sponsorAccount: G,
+      rpc: {
+        simulateTransaction: async () => ({}),
+        assembleTransaction: () => '',
+        sendTransaction: async () => ({ status: 'PENDING', hash: 'h' }),
+        getTransaction: async () => ({ status: 'SUCCESS' }),
+      },
+      readSequence: async () => '1',
+    };
+
+    const second = await handleSettle(settleBody(), deps);
+    expect(second.status).toBe(200);
+    expect(bodyOf(second).receipt).toEqual({
+      stellarAmount: AMOUNT_BASE6,
+      mintTxHash: 'BROADCAST_TX',
+    });
+    expect(await deps.replay.getRecord(HASH)).toMatchObject({
+      status: 'settled',
+      txHash: 'BROADCAST_TX',
+    });
+  });
+
+  it('keeps reporting unconfirmed while the broadcast is still absent from the chain', async () => {
+    const deps = fakeDeps();
+    deps.cctp = {
+      receive: async () => {
+        throw new MintUnconfirmedError(HASH, 'BROADCAST_TX');
+      },
+    } as never;
+    await handleSettle(settleBody(), deps);
+
+    // Chain reachable, hash unknown: a genuine reconciliation item, not a settlement.
+    deps.settleTransport = {
+      sponsorAccount: G,
+      rpc: {
+        simulateTransaction: async () => ({}),
+        assembleTransaction: () => '',
+        sendTransaction: async () => ({ status: 'PENDING', hash: 'h' }),
+        getTransaction: async () => ({ status: 'NOT_FOUND' }),
+      },
+      readSequence: async () => '1',
+    };
+
+    const second = await handleSettle(settleBody(), deps);
+    expect(second.status).toBe(502);
+    expect(bodyOf(second).error).toMatchObject({ code: 'MINT_UNCONFIRMED' });
+    expect(await deps.replay.getRecord(HASH)).toMatchObject({ status: 'submitted' });
+  });
+
   // F1: the local server wires `replay: FileReplayStore` (serve.ts). A bare
   // JSON.stringify throws on the bigint amount/dust, so a CONFIRMED mint would 500 and
   // leave no durable receipt → the next attempt would re-enter receive(). Exercises the

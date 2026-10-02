@@ -485,7 +485,13 @@ export async function handleSettle(input: ApiInput, deps: HandlerDeps): Promise<
     });
   }
   if (existing) {
-    // Broadcast but never confirmed: a reconciliation item, not a settled transfer.
+    // Broadcast but never confirmed. The transaction can still land *after* the
+    // confirmation window closes — that is how a transfer which settled ends up
+    // recorded as a failure, with `status` answering `ready` forever and the receipt
+    // never written. `settleFailure` persisted this hash precisely so a later attempt
+    // could reconcile against it; until now nothing asked the chain.
+    const reconciled = await reconcileSubmitted(deps, existing);
+    if (reconciled) return ok(200, { receipt: reconciled });
     return fail(
       502,
       'MINT_UNCONFIRMED',
@@ -592,16 +598,62 @@ async function persistSettled(
     burnTxHash: string;
     txHash: string;
     amount: bigint;
-    dust: bigint;
-    sourceDomain: number;
-    destinationAddress: string;
+    /** Absent when reconciling: a broadcast record carries no sweep figure. */
+    dust?: bigint;
+    sourceDomain?: number;
+    destinationAddress?: string;
   },
 ): Promise<void> {
   await deps.replay.markProcessed(record.burnTxHash, {
-    ...record,
+    burnTxHash: record.burnTxHash,
+    txHash: record.txHash,
+    amount: record.amount,
+    ...(record.dust === undefined ? {} : { dust: record.dust }),
+    ...(record.sourceDomain === undefined ? {} : { sourceDomain: record.sourceDomain }),
+    ...(record.destinationAddress === undefined ? {} : { destinationAddress: record.destinationAddress }),
     timestamp: new Date(nowMs(deps)).toISOString(),
     status: 'settled',
   });
+}
+
+/**
+ * Resolves a `submitted` replay record against the chain.
+ *
+ * `submitMint` polls for a bounded window and reports `MINT_UNCONFIRMED` on exhaustion —
+ * but "unconfirmed" is not "failed". A mint that lands after that window closes leaves a
+ * transfer which settled recorded as a failure: no receipt written, and `status`
+ * answering `ready` indefinitely. This asks the chain about the hash that was recorded,
+ * and closes the record out when the mint did in fact succeed.
+ *
+ * Returns the receipt when the recorded hash is a confirmed mint, and `null` when it is
+ * not — including when the chain is unreachable, because an unreachable chain is not
+ * evidence that the mint failed.
+ */
+async function reconcileSubmitted(
+  deps: HandlerDeps,
+  existing: SettlementRecord,
+): Promise<{ stellarAmount: string; mintTxHash: string } | null> {
+  const rpc = deps.settleTransport?.rpc;
+  if (!rpc || !existing.txHash) return null;
+
+  let status: string;
+  try {
+    ({ status } = await rpc.getTransaction(existing.txHash));
+  } catch {
+    return null;
+  }
+  if (status !== 'SUCCESS') return null;
+
+  await persistSettled(deps, {
+    burnTxHash: existing.burnTxHash,
+    txHash: existing.txHash,
+    amount: existing.amount ?? 0n,
+    ...(existing.dust === undefined ? {} : { dust: existing.dust }),
+    ...(existing.sourceDomain === undefined ? {} : { sourceDomain: existing.sourceDomain }),
+    ...(existing.destinationAddress === undefined ? {} : { destinationAddress: existing.destinationAddress }),
+  });
+
+  return { stellarAmount: String(existing.amount ?? 0n), mintTxHash: existing.txHash };
 }
 
 async function settleFailure(
