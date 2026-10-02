@@ -2,13 +2,13 @@
 
 > Accept USDC from any CCTP-connected blockchain on Stellar with a single function call.
 
-AnchorCCTP is a production-grade TypeScript SDK, CLI, and Anchor integration suite enabling Stellar anchors and wallets to ingest cross-chain USDC liquidity seamlessly from Ethereum, Base, Solana, Arbitrum, Avalanche, Polygon, and 20+ other chains using Circle's Cross-Chain Transfer Protocol (CCTP).
+AnchorCCTP is a TypeScript SDK, CLI, and Anchor integration suite. It lets Stellar anchors and wallets accept USDC from Ethereum, Base, Solana, Arbitrum, Avalanche, Polygon, and 23 other chains over Circle's Cross-Chain Transfer Protocol (CCTP).
 
 ---
 
 ## Key Capabilities
 
-- **Universal CCTP Routing**: Built-in registry covering all 30 mainnet and testnet CCTP domains.
+- **Universal CCTP Routing**: Built-in registry covering all 30 mainnet and testnet CCTP domains (29 source chains plus Stellar).
 - **Automated Decimal Alignment**: Lossless 6-to-7 decimal integer scaling ($10^{-6} \to 10^{-7}$) with sub-stroop dust routing.
 - **Cryptographic Attestation & Replay Protection**: Automatic Iris proof polling, cryptographic signature verification, and idempotency store.
 - **Deterministic Address Translation**: Automatic translation between EVM 20/32-byte hexadecimal addresses and Stellar Ed25519 public keys (`G...`).
@@ -22,8 +22,8 @@ AnchorCCTP is a production-grade TypeScript SDK, CLI, and Anchor integration sui
 ```
 anchorcctp-sdk/
 ├── packages/
-│   ├── core/              # @anchor-cctp/core-sdk Engine (98%+ test coverage)
-│   └── cli/               # @anchor-cctp/cli terminal command suite (96%+ test coverage)
+│   ├── core/              # @anchor-cctp/core-sdk Engine (96.5% lines / 91.5% branches)
+│   └── cli/               # @anchor-cctp/cli terminal command suite (100% lines / 94.1% branches)
 ├── apps/
 │   └── demo/              # Interactive Freighter-integrated CCTP deposit portal
 └── docs/
@@ -39,8 +39,8 @@ anchorcctp-sdk/
 
 | Package | Version | Description |
 |---|---|---|
-| [`@anchor-cctp/core-sdk`](./packages/core) | `1.0.0` | Core SDK Engine — single async function `receive()` |
-| [`@anchor-cctp/cli`](./packages/cli) | `1.0.0` | Scriptable CLI suite for terminal & DevOps automation |
+| [`@anchor-cctp/core-sdk`](./packages/core) | `1.0.1` | Core SDK Engine, a single async function `receive()` |
+| [`@anchor-cctp/cli`](./packages/cli) | `1.0.1` | Scriptable CLI suite for terminal & DevOps automation |
 | [`apps/demo`](./apps/demo) | `1.0.0` | Freighter-connected React web deposit portal |
 
 ---
@@ -141,22 +141,24 @@ Flow: chain-pin (testnet allowlist only) → gas/USDC checks → approve-if-need
 
 ## Documentation & Standards
 
-- 📚 [**Documentation site**](apps/docs/) — VitePress guides (overview, quickstart, CLI/Core references, SEP-CCTP, security). Run locally: `npm run dev:docs` → http://localhost:5174/docs/overview/what (docs `base` is `/docs/`, same subpath as production). Tombol **Docs** di navbar demo portal link ke sana (prod: `/docs/overview/what` satu domain).
-- 📄 [**API Reference**](docs/api-reference.md): Complete technical specifications for classes, methods, and configurations.
-- 🚀 [**Migration Guide**](docs/migration-guide.md): Guide for anchors migrating to AnchorCCTP.
-- 📜 [**SEP-CCTP Specification Draft**](docs/SEP-CCTP.md): Stellar Ecosystem Proposal draft for CCTP deposit standard.
-- 🧪 [**Verification Evidence**](docs/evidence/):
-  - [CLI 4-Command Output Log](docs/evidence/cli-commands.log)
-  - [Demo Deployment & Live stellar.toml](docs/evidence/demo-deploy.md)
-  - [SEP Protocol PR Link](docs/evidence/sep-pr-link.md)
-  - [Mainnet / Testnet E2E Evidence](docs/evidence/mainnet-e2e.md)
+- [**Documentation site**](apps/docs/): VitePress guides covering the overview, quickstart, CLI and Core references, SEP-CCTP, and security. Run locally with `npm run dev:docs`, then open http://localhost:5174/docs/overview/what. The docs `base` is `/docs/`, the same subpath used in production.
+- [**API Reference**](docs/api-reference.md): technical specifications for classes, methods, and configuration.
+- [**Migration Guide**](docs/migration-guide.md): steps for anchors moving to AnchorCCTP.
+- [**SEP-CCTP Specification Draft**](docs/SEP-CCTP.md): Stellar Ecosystem Proposal draft for the CCTP deposit standard.
+- [**Verification Evidence**](docs/evidence/README.md): numbered index mapping each claim to its proof file.
+  - [L01 Test Coverage](docs/evidence/coverage.md)
+  - [L02 Cross-Chain Settlement Record](docs/evidence/core-receive-sepolia.log)
+  - [L03–L07 CLI Recordings & Output Log](docs/evidence/cli-commands.log)
+  - [L08 Demo Deployment & Live stellar.toml](docs/evidence/demo-deploy.md)
+  - [L11 Demo UI Balance Refresh & Error Panel](docs/evidence/ui-balance-refresh.md)
+  - [L12 SEP Protocol PR Link](docs/evidence/sep-pr-link.md)
 
 ---
 
 ## Quality & Security
 
 - **Strict TDD**: All behaviors accompanied by isolated unit and integration tests.
-- **Coverage**: ≥90% line and branch coverage across core and CLI packages.
+- **Coverage** (measured 2026-10-02, root `npm test -- --coverage`): 31 passing suites and 364 passing specs across core and CLI. Core is 96.48% lines and 91.49% branches, the binding gate in `packages/core/jest.config.js`. The CLI is at 100% lines and 94.07% branches. Combined repo totals are 97.3% lines and 91.89% branches.
 - **Security Guardrails**: No stored private keys, cryptographic verification of all Iris proofs, integer-only BigInt arithmetic, strict spending caps on sponsored trustline creation.
 - **Non-Audit Disclaimer (PRD §7.10)**: This SDK is provided as-is for integration acceleration and has **not** undergone a third-party security audit. Review all signing paths and test thoroughly before handling substantial production value.
 
@@ -165,7 +167,7 @@ Flow: chain-pin (testnet allowlist only) → gas/USDC checks → approve-if-need
 ## Development
 
 ```bash
-git clone https://github.com/Dyjuen/anchorcctp-sdk.git
+git clone https://github.com/Elmanda1/anchorcctp-sdk.git
 cd anchorcctp-sdk
 npm install
 npm test
@@ -178,8 +180,8 @@ npm run build
 
 The demo SPA (`apps/demo/dist`) is static; the receive path runs as Vercel Functions
 under the repo-root `api/` directory, each a thin wrapper over the framework-free
-handlers in `apps/demo/server/handlers.ts`. Slash paths only (spec §6) — a literal `:`
-in a filename is fragile.
+handlers in `apps/demo/server/handlers.ts`. Slash paths only (spec §6), because a
+literal `:` in a filename is fragile.
 
 | Route | File | Method | Hobby duration |
 |---|---|---|---|
@@ -194,23 +196,23 @@ in a filename is fragile.
 (1800s beta). Every Hobby invocation here is designed to finish far inside that: the
 short-poll design keeps each call under ~30s (`settle` polls Iris for at most
 `SETTLE_MAX_RETRIES` = 10 attempts ≈ 60s worst case), and the Standard-path waiting
-happens client-side across many polls, never inside one invocation. **Anything above
-300s requires Pro** — that is the only reason to leave Hobby for this workload.
+happens client-side across many polls, never inside one invocation. Anything above
+300s requires Pro, and that is the only reason to leave Hobby for this workload.
 
 Environment (set in the Vercel dashboard; never `VITE_`-prefixed, so nothing reaches
 the browser bundle):
 
-- `KV_REST_API_URL`, `KV_REST_API_TOKEN` — Upstash Redis via the Vercel Marketplace
+- `KV_REST_API_URL`, `KV_REST_API_TOKEN`: Upstash Redis via the Vercel Marketplace
   (Vercel KV is sunset). Required; the functions fail at cold start without them.
-- `STELLAR_SECRET` — sponsor key, server-only. Required in real mode
+- `STELLAR_SECRET`: sponsor key, server-only. Required in real mode
   (`SIM_MODE=false`, which is the only mode the deployment runs).
-- `CIRCLE_ATTESTATION_BASE_URL` — must be explicit and network-consistent
+- `CIRCLE_ATTESTATION_BASE_URL`: must be explicit and network-consistent
   (testnet → `https://iris-api-sandbox.circle.com`, mainnet →
   `https://iris-api.circle.com`); there is no cross-network default.
-- `HORIZON_URL`, `SOROBAN_RPC_URL` — required, `https` + `*.stellar.org`.
-- `API_ORIGIN` (optional) — the deployment's public origin, added to the CSP
+- `HORIZON_URL`, `SOROBAN_RPC_URL`: required, `https` + `*.stellar.org`.
+- `API_ORIGIN` (optional): the deployment's public origin, added to the CSP
   `connect-src`; falls back to `VERCEL_URL` when unset.
-- `ALLOWED_ORIGINS` (optional, comma-separated) — browser Origin allowlist for
+- `ALLOWED_ORIGINS` (optional, comma-separated): browser Origin allowlist for
   `initiate`; `VERCEL_URL` is appended automatically.
 
 ---

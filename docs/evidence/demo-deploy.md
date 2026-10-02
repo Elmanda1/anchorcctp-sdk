@@ -9,9 +9,9 @@
 | Field | Value |
 |---|---|
 | **Demo Application Name** | AnchorCCTP Portal |
-| **Live URL** | `https://anchor-cctp-demo.vercel.app` |
-| **Well-Known TOML URL** | `https://anchor-cctp-demo.vercel.app/.well-known/stellar.toml` |
-| **Root TOML URL** | `https://anchor-cctp-demo.vercel.app/stellar.toml` |
+| **Live URL** | `https://anchorcctp.dev` |
+| **Well-Known TOML URL** | `https://anchorcctp.dev/.well-known/stellar.toml` |
+| **Root TOML URL** | `https://anchorcctp.dev/stellar.toml` |
 | **Target Network** | Stellar Testnet / Mainnet Compatible |
 | **Integrated Wallet** | Freighter Wallet (@stellar/freighter-api v6.0.1) |
 | **Soroban Forwarder** | `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC` |
@@ -43,7 +43,7 @@ DUST_COLLECTOR_ACCOUNT = "GDDUSTCOLLECTOR000000000000000000000000000000000000000
 
 - [x] Web interface reachable with responsive layout across desktop and mobile.
 - [x] Freighter wallet connection active with sandbox fallback for browser environments without extensions.
-- [x] Source blockchain selection dynamically loaded from `@anchor-cctp/core` `CCTP_DOMAINS` registry (26 chains).
+- [x] Source blockchain selection dynamically loaded from `@anchor-cctp/core` `CCTP_DOMAINS` registry (30 domains).
 - [x] Real-time 4-step deposit lifecycle visualized:
   1. Burn Confirmation
   2. Circle Iris Attestation Polling
