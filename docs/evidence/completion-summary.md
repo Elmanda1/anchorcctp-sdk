@@ -23,7 +23,7 @@ block and the `mint_and_forward` interface.
 | Deliverable | Status | Evidence |
 |---|---|---|
 | D1 — Core SDK (`@anchor-cctp/core-sdk`), single `receive()` API | **Done** | npm package; coverage ([L01](coverage.md)); testnet settlement record ([L02](core-receive-sepolia.log)) |
-| D2 — CLI (`@anchor-cctp/cli`): `init`, `listen`, `verify`, `domains` | **Done, two named gaps** | npm package; recordings [L03](cli-domains.gif)–[L06](cli-verify.gif); `listen` recorded with `--simulate` ([L05](cli-listen.gif)); error-branch log predates 1.0.2 ([L07](cli-commands.log)) |
+| D2 — CLI (`@anchor-cctp/cli`): `init`, `listen`, `verify`, `domains` | **Done, one named gap** | npm package; recordings [L03](cli-domains.gif)–[L06](cli-verify.gif); `listen` recorded with `--simulate` ([L05](cli-listen.gif)); JSON + error branches re-recorded 2026-10-02 on 1.0.2 ([L07](cli-commands.log)) |
 | D3 — Demo anchor, Freighter UI, SEP-CCTP PR, walkthrough video | **Partial** | Portal + docs live ([L09](ui-demo-portal.png), [L10](ui-docs-site.png)); live `stellar.toml` carries mainnet values ([L08](demo-deploy.md)); SEP PR [L12](sep-pr-link.md); 4:09 walkthrough video. Mainnet E2E not produced ([L13](mainnet-e2e.md)); settle API unhealthy; cancelled/credit shots pending |
 | Overall — completion summary + walkthrough video | Summary: this document. Video: [walkthrough](https://youtu.be/jTVbVezrICM) | — |
 

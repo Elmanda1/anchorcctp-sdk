@@ -2,10 +2,21 @@
 AnchorCCTP CLI Functional Evidence Log (PRD §12 Verification Evidence)
 ======================================================================
 
+Recorded: 2026-10-02
+Packages: @anchor-cctp/cli@1.0.2 + @anchor-cctp/core-sdk@1.0.1 (built from
+this repo: `npm run build --workspace=@anchor-cctp/core-sdk` then
+`--workspace=@anchor-cctp/cli`; `anchor-cctp --version` reports v1.0.2).
+Each section shows the exact command, exit code, stdout, and stderr.
+`init` writes into /tmp/opencode/l07/ (not the repo) so no source file is
+touched. `verify` §4 hits live Circle Iris sandbox
+(https://iris-api-sandbox.circle.com) for a real completed Base Sepolia
+burn (the same BURN A recorded in core-receive-sepolia.log §1).
+
+----------------------------------------------------------------------
 # 1. anchor-cctp domains
 # Command: anchor-cctp domains
 # Exit Code: 0
-# STDOUT (JSON):
+# STDOUT (JSON, 30 entries):
 [
   {
     "domainId": 0,
@@ -32,12 +43,6 @@ AnchorCCTP CLI Functional Evidence Log (PRD §12 Verification Evidence)
     "networkType": "EVM"
   },
   {
-    "domainId": 4,
-    "chain": "noble",
-    "name": "Noble",
-    "networkType": "Cosmos"
-  },
-  {
     "domainId": 5,
     "chain": "solana",
     "name": "Solana",
@@ -54,6 +59,12 @@ AnchorCCTP CLI Functional Evidence Log (PRD §12 Verification Evidence)
     "chain": "polygon",
     "name": "Polygon PoS",
     "networkType": "EVM"
+  },
+  {
+    "domainId": 9,
+    "chain": "aptos",
+    "name": "Aptos",
+    "networkType": "Move"
   },
   {
     "domainId": 10,
@@ -86,9 +97,21 @@ AnchorCCTP CLI Functional Evidence Log (PRD §12 Verification Evidence)
     "networkType": "EVM"
   },
   {
+    "domainId": 15,
+    "chain": "monad",
+    "name": "Monad",
+    "networkType": "EVM"
+  },
+  {
     "domainId": 16,
     "chain": "sei",
     "name": "Sei",
+    "networkType": "EVM"
+  },
+  {
+    "domainId": 17,
+    "chain": "bnb",
+    "name": "BNB Smart Chain",
     "networkType": "EVM"
   },
   {
@@ -119,6 +142,12 @@ AnchorCCTP CLI Functional Evidence Log (PRD §12 Verification Evidence)
     "domainId": 25,
     "chain": "starknet",
     "name": "Starknet",
+    "networkType": "EVM"
+  },
+  {
+    "domainId": 26,
+    "chain": "arc",
+    "name": "Arc",
     "networkType": "EVM"
   },
   {
@@ -158,56 +187,124 @@ AnchorCCTP CLI Functional Evidence Log (PRD §12 Verification Evidence)
     "networkType": "EVM"
   },
   {
+    "domainId": 33,
+    "chain": "plasma",
+    "name": "Plasma",
+    "networkType": "EVM"
+  },
+  {
     "domainId": 37,
     "chain": "xlayer",
     "name": "X Layer",
     "networkType": "EVM"
   }
 ]
+# STDERR: (empty)
 
 ----------------------------------------------------------------------
-# 2. anchor-cctp init
-# Command: anchor-cctp init --domain 27 --usdc-issuer GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5 --output ./stellar.toml
+# 2. anchor-cctp init (defaults: testnet issuer + forwarder, no dust line)
+# Command: anchor-cctp init --domain 27 --usdc-issuer GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5 --output /tmp/opencode/l07/stellar.toml
 # Exit Code: 0
 # STDOUT (JSON):
 {
   "success": true,
-  "configBlock": "# Auto-generated CCTP configuration for Stellar Anchor\n[[CURRENCIES]]\ncode = \"USDC\"\nissuer = \"GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5\"\ncctp_domain = 27\ncctp_forwarder = \"CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC\"\n\n[CCTP]\nCCTP_DOMAIN = 27\nFORWARDER_ADDRESS = \"CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC\"\nSUPPORTED_SOURCE_DOMAINS = [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 16, 18, 19, 21, 22, 25, 28, 29, 30, 31, 32, 37]\nDUST_HANDLING = \"collector_sweep\"\nDUST_COLLECTOR_ACCOUNT = \"GDDUSTCOLLECTOR00000000000000000000000000000000000000000000\"\n",
-  "writtenPath": "./stellar.toml"
+  "configBlock": "# Auto-generated CCTP configuration for Stellar Anchor\n[[CURRENCIES]]\ncode = \"USDC\"\nissuer = \"GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5\"\ncctp_domain = 27\ncctp_forwarder = \"CA66Q2WFBND6V4UEB7RD4SAXSVIWMD6RA4X3U32ELVFGXV5PJK4T4VSZ\"\n\n[CCTP]\nCCTP_DOMAIN = 27\nFORWARDER_ADDRESS = \"CA66Q2WFBND6V4UEB7RD4SAXSVIWMD6RA4X3U32ELVFGXV5PJK4T4VSZ\"\nSUPPORTED_SOURCE_DOMAINS = [0, 1, 2, 3, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 25, 26, 28, 29, 30, 31, 32, 33, 37]\nDUST_HANDLING = \"collector_sweep\"\n",
+  "writtenPath": "/tmp/opencode/l07/stellar.toml"
 }
 # STDERR:
-[INFO] stellar.toml CCTP block generated at ./stellar.toml
+[INFO] stellar.toml CCTP block generated at /tmp/opencode/l07/stellar.toml
+# Note: no DUST_COLLECTOR_ACCOUNT line — by design, init emits it only when
+# --dust-collector is passed (see §3). Forwarder is the current
+# TESTNET_FORWARDER (CA66…); the retired CDLZ… default from the 2026-08-25
+# log is gone. Source list holds 29 entries (30 domains minus 27).
 
 ----------------------------------------------------------------------
-# 3. anchor-cctp verify
-# Command: anchor-cctp verify 0x9a8f4c2e1b3d7a8c6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d
+# 3. anchor-cctp init --dust-collector (opt-in dust sink)
+# Command: anchor-cctp init --domain 27 --usdc-issuer GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5 --dust-collector GAM2LT4MNPTLO6ODP5UEB2OTNJTEDSZRGVQG4354AUSFI27YOO5KHVES --output /tmp/opencode/l07/stellar-dust.toml
 # Exit Code: 0
 # STDOUT (JSON):
 {
-  "txHash": "0x9a8f4c2e1b3d7a8c6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d",
-  "attested": true,
-  "status": "complete",
-  "sourceDomain": 0,
-  "destinationDomain": 27,
-  "attestation": "0x321a4f00b95d98fa...",
-  "message": "0x00000000000000000000001b..."
+  "success": true,
+  "configBlock": "# Auto-generated CCTP configuration for Stellar Anchor\n[[CURRENCIES]]\ncode = \"USDC\"\nissuer = \"GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5\"\ncctp_domain = 27\ncctp_forwarder = \"CA66Q2WFBND6V4UEB7RD4SAXSVIWMD6RA4X3U32ELVFGXV5PJK4T4VSZ\"\n\n[CCTP]\nCCTP_DOMAIN = 27\nFORWARDER_ADDRESS = \"CA66Q2WFBND6V4UEB7RD4SAXSVIWMD6RA4X3U32ELVFGXV5PJK4T4VSZ\"\nSUPPORTED_SOURCE_DOMAINS = [0, 1, 2, 3, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 25, 26, 28, 29, 30, 31, 32, 33, 37]\nDUST_HANDLING = \"collector_sweep\"\nDUST_COLLECTOR_ACCOUNT = \"GAM2LT4MNPTLO6ODP5UEB2OTNJTEDSZRGVQG4354AUSFI27YOO5KHVES\"\n",
+  "writtenPath": "/tmp/opencode/l07/stellar-dust.toml"
 }
 # STDERR:
-[INFO] Polling attestation for 0x9a8f4c2e1b3d7a8c6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d...
-{"ts":"2026-08-25T02:17:28.909Z","level":"debug","ns":"attestation","msg":"Polling Circle Attestation","burnTxHash":"0x9a8f4c2e1b3d7a8c6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d","attempt":1,"elapsedMs":0}
-{"ts":"2026-08-25T02:17:28.922Z","level":"info","ns":"attestation","msg":"Attestation complete","burnTxHash":"0x9a8f4c2e1b3d7a8c6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d","attempt":1,"elapsedMs":0}
+[INFO] stellar.toml CCTP block generated at /tmp/opencode/l07/stellar-dust.toml
 
 ----------------------------------------------------------------------
-# 4. anchor-cctp listen
+# 4. anchor-cctp verify (live: real Base Sepolia burn, Iris sandbox)
+# Command: anchor-cctp verify 0x39e8bd0cdb0326d2847391e2abf7cd3573a59110f25c0c86f64b7dd7acad2acd --source-domain 6 --testnet --max-retries 10 --poll-interval 1500
+# Exit Code: 0
+# STDOUT (JSON):
+{
+  "txHash": "0x39e8bd0cdb0326d2847391e2abf7cd3573a59110f25c0c86f64b7dd7acad2acd",
+  "attested": true,
+  "status": "complete",
+  "sourceDomain": 6,
+  "destinationDomain": 27,
+  "attestation": "0xef6b690eb42bbb9382dde2351cdb9dcbf73c04bad4165655a3f2d9d97bb99ed35a6704051f4a3b0aadf519b2462ee4de450976a7f5d0c03500254821907f4e8a1bd6ffe318f8bc566e86b9ff65e586b60c5880c54a6c63f2842995bac2a787de487dcd8814d154d0329290748109d5bfc4cbb41af870ebadacf8eb5d2fd831ef381b",
+  "message": "0x00000001000000060000001b762bc041df5f4694afb7cf9755bebb6c6c67e86a3debdda4293fef5e34dca0150000000000000000000000008fe6b999dc680ccfdd5bf7eb0974218be2542daada6f9ee0786c812344d82817ef19b648b4af120f8bd10bf658e6b99eacff24b83de86ac50b47eaf2840fe23e48179551660fd1072fba6f445d4a6bd7af4ab93e000003e8000003e800000001000000000000000000000000036cbd53842c5426634e7929541ec2318f3dcf7e3de86ac50b47eaf2840fe23e48179551660fd1072fba6f445d4a6bd7af4ab93e00000000000000000000000000000000000000000000000000000000000f4240000000000000000000000000edd1b3b72e41d16425075eabe699612fe22c0e630000000000000000000000000000000000000000000000000000000000000082000000000000000000000000000000000000000000000000000000000000008200000000000000000000000000000000000000000000000000000000004c102d000000000000000000000000000000000000000000000000000000000000003847435832455158535043484d42534547595a5256545a574f494452585752575945465254434e564f5a5059584534514546504b4e55463356"
+}
+# STDERR:
+[INFO] Polling attestation for 0x39e8bd0cdb0326d2847391e2abf7cd3573a59110f25c0c86f64b7dd7acad2acd...
+{"ts":"2026-10-02T05:44:52.898Z","level":"debug","ns":"attestation","msg":"Polling CCTP v2 messages","sourceDomain":6,"txHash":"0x39e8bd0cdb0326d2847391e2abf7cd3573a59110f25c0c86f64b7dd7acad2acd","attempt":1,"elapsedMs":0}
+# Note: attestation 262 hex chars, message 930 hex chars (full values above).
+# Repro: re-run the command; same completed burn → same attested:true.
+
+----------------------------------------------------------------------
+# 5. anchor-cctp verify -- error branch (malformed hash)
+# Command: anchor-cctp verify 0xabc
+# Exit Code: 1
+# STDOUT (JSON):
+{
+  "error": "Invalid txHash format: \"0xabc\". Must be 0x + 64 hex characters.",
+  "code": "INVALID_HASH",
+  "remediation": "Provide EVM transaction hash as 0x + 64 hex characters."
+}
+# STDERR:
+[ERROR] Invalid txHash format: 0xabc
+
+----------------------------------------------------------------------
+# 6. anchor-cctp init -- error branch (unknown domain)
+# Command: anchor-cctp init --domain 9999 --output /tmp/opencode/l07/nope.toml
+# Exit Code: 1
+# STDOUT (JSON):
+{
+  "error": "Unsupported CCTP domain ID: 9999.",
+  "code": "INVALID_DOMAIN",
+  "remediation": "Provide a supported sourceDomain (e.g. 0 for Ethereum, 6 for Base, 27 for Stellar)."
+}
+# STDERR:
+[ERROR] Unsupported CCTP domain ID: 9999.
+
+----------------------------------------------------------------------
+# 7. anchor-cctp listen --simulate (NDJSON shape, NOT a live stream)
 # Command: anchor-cctp listen GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5 --simulate --limit 2
 # Exit Code: 0
 # STDOUT (NDJSON):
-{"event":"inbound_burn_detected","sourceChain":"Ethereum","sourceDomain":0,"amount":"100.000000","status":"attesting","timestamp":"2026-08-25T02:17:29.067Z"}
-{"event":"settled","sourceChain":"Ethereum","destination":"GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5","amount":"100.0000000","dust":"0","txHash":"0x6d073ebd440837844777a7ede0a3fbdef2ee9690dd1b4396302a468addfc089c","timestamp":"2026-08-25T02:17:29.078Z"}
+{"event":"inbound_burn_detected","sourceChain":"Ethereum","sourceDomain":0,"amount":"100.000000","status":"attesting","timestamp":"2026-10-02T05:44:48.861Z"}
+{"event":"settled","sourceChain":"Ethereum","destination":"GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5","amount":"100.0000000","dust":"0","txHash":"0xSIM00000000000000000000000000000000000000000000000000000000000","simulate":true,"timestamp":"2026-10-02T05:44:48.871Z"}
 # STDERR:
 [INFO] Streaming inbound CCTP transfers for GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5...
 [INFO] Rate limit guardrail: max 5 events/sec
 [INFO] Stream ended after 2 events.
+# Note: synthetic events (`simulate:true`, `0xSIM…` hash). Output shape is
+# real; the stream is not. Live path is a Horizon effects stub.
+
+----------------------------------------------------------------------
+# 8. anchor-cctp listen -- error branch (bad --limit)
+# Command: anchor-cctp listen GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5 --limit abc
+# Exit Code: 1
+# STDOUT (JSON):
+{
+  "error": "Invalid --limit value: \"abc\". Must be a finite integer.",
+  "code": "INVALID_ARGUMENT",
+  "remediation": "Pass a valid integer for --limit."
+}
+# STDERR:
+[ERROR] Invalid --limit: abc
 
 ======================================================================
-All 4 CLI commands executed successfully with schema-conforming JSON.
+8 sections, all exit codes as shown. Happy paths (§1–§4, §7) exit 0 with
+schema-conforming JSON/NDJSON; error branches (§5, §6, §8) exit 1 with
+{ error, code, remediation } on stdout.
