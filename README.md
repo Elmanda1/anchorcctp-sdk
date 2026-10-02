@@ -40,7 +40,7 @@ anchorcctp-sdk/
 | Package | Version | Description |
 |---|---|---|
 | [`@anchor-cctp/core-sdk`](./packages/core) | `1.0.1` | Core SDK Engine, a single async function `receive()` |
-| [`@anchor-cctp/cli`](./packages/cli) | `1.0.1` | Scriptable CLI suite for terminal & DevOps automation |
+| [`@anchor-cctp/cli`](./packages/cli) | `1.0.2` | Scriptable CLI suite for terminal & DevOps automation |
 | [`apps/demo`](./apps/demo) | `1.0.0` | Freighter-connected React web deposit portal |
 
 ---
@@ -152,6 +152,8 @@ Flow: chain-pin (testnet allowlist only) → gas/USDC checks → approve-if-need
   - [L08 Demo Deployment & Live stellar.toml](docs/evidence/demo-deploy.md)
   - [L11 Demo UI Balance Refresh & Error Panel](docs/evidence/ui-balance-refresh.md)
   - [L12 SEP Protocol PR Link](docs/evidence/sep-pr-link.md)
+  - [L13 Mainnet E2E Handoff Brief](docs/evidence/mainnet-e2e-handoff.md)
+  - [L15 Instaward Completion Summary](docs/evidence/completion-summary.md)
 
 ---
 
