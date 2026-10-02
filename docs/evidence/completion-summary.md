@@ -24,8 +24,8 @@ block and the `mint_and_forward` interface.
 |---|---|---|
 | D1 — Core SDK (`@anchor-cctp/core-sdk`), single `receive()` API | **Done** | npm package; coverage ([L01](coverage.md)); testnet settlement record ([L02](core-receive-sepolia.log)) |
 | D2 — CLI (`@anchor-cctp/cli`): `init`, `listen`, `verify`, `domains` | **Done, one named gap** | npm package; recordings [L03](cli-domains.gif)–[L06](cli-verify.gif); `listen` recorded with `--simulate` ([L05](cli-listen.gif)); JSON + error branches re-recorded 2026-10-02 on 1.0.2 ([L07](cli-commands.log)) |
-| D3 — Demo anchor, Freighter UI, SEP-CCTP PR, walkthrough video | **Partial** | Portal + docs live ([L09](ui-demo-portal.png), [L10](ui-docs-site.png)); live `stellar.toml` carries mainnet values ([L08](demo-deploy.md)); SEP PR [L12](sep-pr-link.md); 4:09 walkthrough video. Mainnet E2E now produced ([L13](mainnet-e2e.md)) — the portal reported failure for a transfer that settled, and the video predates it; cancelled/credit shots pending |
-| Overall — completion summary + walkthrough video | Summary: this document. Video: [walkthrough](https://youtu.be/jTVbVezrICM) | — |
+| D3 — Demo anchor, Freighter UI, SEP-CCTP PR, walkthrough video | **Partial** | Portal + docs live ([L09](ui-demo-portal.png), [L10](ui-docs-site.png)); live `stellar.toml` carries mainnet values ([L08](demo-deploy.md)); SEP PR [L12](sep-pr-link.md); ~5-minute walkthrough covering the mainnet flow through settlement. Mainnet E2E produced ([L13](mainnet-e2e.md)) — the portal reported failure for a transfer that settled; cancelled/credit shots pending |
+| Overall — completion summary + walkthrough video | Summary: this document. Video: [walkthrough](https://youtu.be/AekuzV29POY) | — |
 
 ## What "done" means here
 
@@ -70,7 +70,7 @@ than rounding them up:
 
 ## External links
 
-- Walkthrough video: https://youtu.be/jTVbVezrICM ("Anchor CCTP SDK Walkthrough & Demo")
+- Walkthrough video: https://youtu.be/AekuzV29POY ("Anchor CCTP SDK Walkthrough & Demo App"). Covers the mainnet flow through settlement; the source-chain burn and the trustline `changeTrust` stay external and manual, so Freighter does not sign those
 - Live demo anchor: https://anchorcctp.dev · live `stellar.toml`: https://anchorcctp.dev/.well-known/stellar.toml
 - SEP-CCTP pull request (open, awaiting review): https://github.com/stellar/stellar-protocol/pull/2031
 - Core SDK on npm: https://www.npmjs.com/package/@anchor-cctp/core-sdk

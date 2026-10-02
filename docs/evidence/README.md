@@ -51,7 +51,6 @@ but does not yet support the claim; the gap is named in the status column.
 | Deliverable item | Status |
 |---|---|
 | Freighter screenshots for cancelled wait and final USDC credit | Partially captured. L09 now holds connect, burn, attest, settled, and all three error states; `ui-cancelled.png` and `ui-credit.png` still missing |
-| Walkthrough video (SOW asks 3–5 min demoing the mainnet workflow) | **Partially satisfied.** A 4:09 walkthrough exists — https://youtu.be/jTVbVezrICM ("Anchor CCTP SDK Walkthrough & Demo") — so the length is in range. It does not demonstrate a mainnet settlement on camera. A mainnet transfer has since settled and is recorded at [L13](mainnet-e2e.md), but the video predates it |
 | `receive()` runtime log produced by the SDK itself | L02 is a verification record re-derived from public APIs, not captured stdout of one `receive()` call |
 | Application reconciliation of a settled mainnet transfer | **Closed** in `43ff455`. The portal reported `MINT_UNCONFIRMED` for a transfer that settled on chain; `handleSettle` now asks the chain about the recorded broadcast hash and closes the record out as settled when the mint succeeded. Two related gaps stay open: clearing a stale first-claimer-wins intent binding, and releasing a broadcast whose hash is provably absent from the chain so it can be retried. The brief for the mainnet leg remains [mainnet-e2e-handoff.md](mainnet-e2e-handoff.md) |
 
@@ -59,7 +58,7 @@ but does not yet support the claim; the gap is named in the status column.
 
 | What | URL |
 |---|---|
-| Walkthrough video (4:09) | https://youtu.be/jTVbVezrICM |
+| Walkthrough video (~5 min) | https://youtu.be/AekuzV29POY — "Anchor CCTP SDK Walkthrough & Demo App". Covers the mainnet flow through settlement. Freighter is not used to sign the source-chain burn or the trustline `changeTrust`; both stay external and manual, as described in [L09](ui-demo-portal.png) |
 | Live demo anchor | https://anchorcctp.dev |
 | Live `stellar.toml` | https://anchorcctp.dev/.well-known/stellar.toml |
 | SEP-CCTP pull request | https://github.com/stellar/stellar-protocol/pull/2031 |
