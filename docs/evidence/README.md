@@ -49,7 +49,7 @@ but does not yet support the claim; the gap is named in the status column.
 | Deliverable item | Status |
 |---|---|
 | Freighter screenshots for each transfer step and each error case | Not captured. L09/L10 show the portal and docs pages; no screenshot shows a connected Freighter session, a signing rejection, an insufficient-XLM state, or a network-mismatch error |
-| Two-minute walkthrough video | Not recorded |
+| Walkthrough video (SOW asks 3–5 min demoing the mainnet workflow) | **Partially satisfied.** A 4:09 walkthrough exists — https://youtu.be/jTVbVezrICM ("Anchor CCTP SDK Walkthrough & Demo") — so the length is in range. It cannot demonstrate a mainnet settlement, because no mainnet transfer was run ([L13](mainnet-e2e.md)) |
 | `receive()` runtime log produced by the SDK itself | L02 is a verification record re-derived from public APIs, not captured stdout of one `receive()` call |
 | Mainnet end-to-end record | Not produced. The brief for the mainnet leg — what to prove, the environment, the `testnet-auto.ts` mainnet gate, and an acceptance checklist — is [mainnet-e2e-handoff.md](mainnet-e2e-handoff.md) |
 
@@ -57,7 +57,7 @@ but does not yet support the claim; the gap is named in the status column.
 
 | What | URL |
 |---|---|
-| Demo video (3–5 min) | https://youtu.be/jTVbVezrICM |
+| Walkthrough video (4:09) | https://youtu.be/jTVbVezrICM |
 | Live demo anchor | https://anchorcctp.dev |
 | Live `stellar.toml` | https://anchorcctp.dev/.well-known/stellar.toml |
 | SEP-CCTP pull request | https://github.com/stellar/stellar-protocol/pull/2031 |
