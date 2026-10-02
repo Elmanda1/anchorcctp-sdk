@@ -524,6 +524,25 @@ async function _doCollectReal(
       events.push({ type: 'settled', stellarAmount: String(result.amount), dust: String(result.dust), txHash: result.txHash });
     }
 
+    // Handler-owned receipt: core writes into client's own in-process store —
+    // invisible across invocations. Persist into durable store shared by
+    // status/settle, else chain replays 6908 forever: idempotent keyed mint
+    // receipt, upgrade path single txns table when multi-instance KV.
+    try {
+      await store.markProcessed(params.burnTxHash, {
+        burnTxHash: params.burnTxHash,
+        txHash: result.txHash,
+        sourceDomain: params.sourceDomain,
+        destinationAddress: params.address,
+        amount: result.amount,
+        dust: result.dust,
+        timestamp: new Date().toISOString(),
+        status: 'settled',
+      });
+    } catch {
+      // Durability best effort: receipt already in hand; settle persists too.
+    }
+
     return events;
   } catch (err) {
     // ReplayTransferError from core → ALREADY_PROCESSED error event

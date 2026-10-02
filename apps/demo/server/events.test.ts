@@ -157,6 +157,21 @@ describe('collectSseReal', () => {
     expect(last.txHash).toBe('SIM-REAL-1');
     expect(last.simulated).not.toBe(true);
   });
+  it('persists the settled receipt into the durable store so settle never re-mints', async () => {
+    const store = fileStoreAt(tmpPath());
+    const hash = '0x' + 'cd'.repeat(32);
+    await collectSseReal(
+      { address: G, burnTxHash: hash, sourceDomain: 0, amount: 1000000n },
+      {
+        store,
+        clientFactory: () => ({
+          receive: async () => ({ amount: 1000000n, dust: 0n, txHash: 'SIM-REAL-1', settled: true }),
+        }),
+      },
+    );
+    expect(await store.isProcessed(hash)).toBe(true);
+    expect((await store.getRecord(hash))?.status).toBe('settled');
+  });
   it('evicts single-flight on rejection so retry re-polls', async () => {
     let calls = 0;
     const deps = {
