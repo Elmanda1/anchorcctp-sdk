@@ -9,6 +9,7 @@ import {
   ReplayTransferError,
   AttestationVerificationError,
   ForwarderContractError,
+  InvalidConfigError,
 } from '../src/index';
 import type { SorobanTransport } from '../src/index';
 
@@ -103,6 +104,14 @@ describe('Typed Error Classes', () => {
     const f = new ForwarderContractError('CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC', 'build failed');
     expect(f.code).toBe('FORWARDER_CONTRACT_ERROR');
     expect(f.remediation).toBeDefined();
+  });
+
+  it('InvalidConfigError message is network-agnostic (no hardcoded testnet)', () => {
+    const e = new InvalidConfigError('STELLAR_NETWORK must be "testnet" or "mainnet"');
+    expect(e.code).toBe('INVALID_CONFIG');
+    expect(e.message).toContain('STELLAR_NETWORK must be "testnet" or "mainnet"');
+    expect(e.message.toLowerCase()).not.toContain('testnet config');
+    expect(e.remediation.toLowerCase()).not.toContain('testnet.public.json');
   });
 });
 

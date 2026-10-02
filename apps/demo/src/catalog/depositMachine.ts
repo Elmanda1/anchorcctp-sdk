@@ -380,12 +380,18 @@ export function sseErrorMessage(data: Record<string, unknown>): string {
 }
 
 /** Map a simError select value to a synthetic DepositEvent, or null for 'none'. */
-export function simErrorEvent(value: string): DepositEvent | null {
+export function simErrorEvent(
+  value: string,
+  network: 'testnet' | 'mainnet' = 'testnet',
+): DepositEvent | null {
   switch (value) {
     case 'rejected-signing':
       return { type: 'error', message: 'Freighter signing rejected — unlock wallet and approve the transaction' };
     case 'insufficient-xlm':
-      return { type: 'error', message: 'Insufficient XLM balance — fund with testnet friendbot: https://friendbot.stellar.org' };
+      // Mainnet has no friendbot — never point prod users at testnet funding.
+      return network === 'mainnet'
+        ? { type: 'error', message: 'Insufficient XLM balance — fund with XLM via exchange withdrawal' }
+        : { type: 'error', message: 'Insufficient XLM balance — fund with testnet friendbot: https://friendbot.stellar.org' };
     case 'network-mismatch':
       return { type: 'error', message: 'Network mismatch — switch Freighter wallet to the correct network and retry' };
     default:

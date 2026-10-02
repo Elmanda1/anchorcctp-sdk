@@ -177,6 +177,18 @@ describe('getAccountBalances', () => {
     await expect(getAccountBalances('GUNFUNDED' + 'A'.repeat(48), 'https://horizon-testnet.stellar.org')).rejects.toThrow(/unfunded/i);
   });
 
+  it('unfunded on testnet points to friendbot', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 404 }));
+    await expect(getAccountBalances('GUNFUNDED' + 'A'.repeat(48), 'https://horizon-testnet.stellar.org')).rejects.toThrow(/friendbot/i);
+  });
+
+  it('unfunded on mainnet never mentions friendbot', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 404 }));
+    const err = await getAccountBalances('GUNFUNDED' + 'A'.repeat(48), 'https://horizon.stellar.org').catch((e: unknown) => e as Error);
+    expect((err as Error).message).toMatch(/unfunded|fund.*xlm/i);
+    expect((err as Error).message.toLowerCase()).not.toContain('friendbot');
+  });
+
   it('throws generic error on non-404 failure (500)', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 500 }));
     await expect(getAccountBalances(G, 'https://horizon-testnet.stellar.org')).rejects.toThrow(/Horizon request failed \(500\)/);

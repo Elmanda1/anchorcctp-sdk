@@ -166,6 +166,17 @@ export async function signWithFreighter(
 }
 
 /**
+ * Network-aware funding guidance. Testnet accounts fund via friendbot;
+ * mainnet has no friendbot — fund via exchange withdrawal. Inferred from the
+ * Horizon URL so callers cannot show testnet instructions on mainnet.
+ */
+function fundingGuidance(horizonUrl: string): string {
+  return /testnet/i.test(horizonUrl)
+    ? 'send testnet XLM from friendbot.stellar.org'
+    : 'fund with XLM via exchange withdrawal';
+}
+
+/**
  * Verify destination account exists and has a funded XLM balance.
  * Returns the current XLM and USDC balances.
  */
@@ -186,8 +197,11 @@ export async function verifyAccountFunded(
       )?.balance ?? '0';
 
     return { xlm: xlmBalance, usdc: usdcBalance, exists: true };
-  } catch {
-    throw new Error(`Account unfunded: send testnet XLM from friendbot.stellar.org to ${address}`);
+  } catch (err) {
+    // Preserve the network-aware message from getAccountBalances (404/Horizon
+    // errors already carry the right guidance) — never overwrite with testnet text.
+    if (err instanceof Error && /unfunded|horizon request failed/i.test(err.message)) throw err;
+    throw new Error(`Account unfunded: ${fundingGuidance(horizonUrl)} to ${address}`, { cause: err });
   }
 }
 
@@ -197,7 +211,7 @@ export async function getAccountBalances(address: string, horizonUrl: string): P
   }
   const res = await fetch(`${horizonUrl}/accounts/${encodeURIComponent(address)}`);
   if (res.status === 404) {
-    throw new Error(`Account unfunded: send testnet XLM from friendbot.stellar.org to ${address}`);
+    throw new Error(`Account unfunded: ${fundingGuidance(horizonUrl)} to ${address}`);
   }
   if (!res.ok) {
     throw new Error(`Horizon request failed (${res.status})`);

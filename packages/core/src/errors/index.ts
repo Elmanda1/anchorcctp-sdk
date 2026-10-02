@@ -126,10 +126,10 @@ export class ForwarderContractError extends AnchorCCTPError {
  */
 export class InvalidConfigError extends AnchorCCTPError {
   readonly code = 'INVALID_CONFIG';
-  readonly remediation = 'Fix config/testnet.public.json (public addresses only) and keep secrets in .env.testnet.';
+  readonly remediation = 'Fix public config (public addresses only) and keep secrets in env vars.';
 
   constructor(public readonly reason: string) {
-    super(`Invalid testnet config: ${reason}.`);
+    super(`Invalid config: ${reason}.`);
   }
 }
 /**

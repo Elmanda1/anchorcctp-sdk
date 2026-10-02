@@ -519,7 +519,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
     }
 
     // Error simulation: inject synthetic event instead of starting a transfer.
-    const simEvt = simErrorEvent(simError);
+    const simEvt = simErrorEvent(simError, network);
     if (simEvt) {
       setDeposit((s) => reduceDeposit({ ...s, step: 'burning' }, simEvt));
       return;

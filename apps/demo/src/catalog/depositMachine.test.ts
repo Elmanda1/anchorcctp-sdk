@@ -90,6 +90,16 @@ describe('simErrorEvent', () => {
     const e = simErrorEvent('insufficient-xlm');
     expect(e).toEqual({ type: 'error', message: expect.stringMatching(/insufficient xlm/i) });
   });
+  it('insufficient-xlm defaults to testnet friendbot guidance', () => {
+    const e = simErrorEvent('insufficient-xlm');
+    expect((e as { message: string }).message).toMatch(/friendbot/i);
+  });
+  it('insufficient-xlm on mainnet never mentions friendbot', () => {
+    const e = simErrorEvent('insufficient-xlm', 'mainnet');
+    expect((e as { message: string }).message).toMatch(/insufficient xlm/i);
+    expect((e as { message: string }).message.toLowerCase()).not.toContain('friendbot');
+    expect((e as { message: string }).message).toMatch(/fund.*xlm/i);
+  });
   it('maps network-mismatch to actionable error event', () => {
     const e = simErrorEvent('network-mismatch');
     expect(e).toEqual({ type: 'error', message: expect.stringMatching(/network mismatch/i) });
