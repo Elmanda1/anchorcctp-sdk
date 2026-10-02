@@ -1,7 +1,7 @@
 {
   "network": "mainnet",
   "horizonUrl": "https://horizon.stellar.org",
-  "sorobanRpcUrl": "https://soroban-mainnet.stellar.org",
+  "sorobanRpcUrl": "https://mainnet.sorobanrpc.com",
   "attestationBaseUrl": "https://iris-api.circle.com",
   "attestationV2Pattern": "GET {base}/v2/messages/{sourceDomain}?transactionHash=0x...",
   "forwarderContractId": "CBZL2IH7F6BIDAA3WBNXYKIXSATJGMSW7K5P5MJ6STX5RXN47TZJDF5T",

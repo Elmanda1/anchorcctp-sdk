@@ -194,7 +194,7 @@ representative snippet.
     - **Purpose**: Tests SDK configuration loading and structured JSON logging.
     - **Code Example**:
       ```typescript
-      const sdk = createAnchorCCTP({ rpcUrl: 'https://soroban-mainnet.stellar.org' });
+      const sdk = createAnchorCCTP({ rpcUrl: 'https://mainnet.sorobanrpc.com' });
       logger.info('Transfer settled', { amount: '10000000' });
       ```
 

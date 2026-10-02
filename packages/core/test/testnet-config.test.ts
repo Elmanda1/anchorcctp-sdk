@@ -409,7 +409,7 @@ describe('R9: env factory wires trustline provider, Soroban transport and sponso
       STELLAR_DESTINATION: kp.publicKey(),
       STELLAR_SECRET: kp.secret(),
       HORIZON_URL: 'https://horizon.stellar.org',
-      SOROBAN_RPC_URL: 'https://soroban-mainnet.stellar.org',
+      SOROBAN_RPC_URL: 'https://mainnet.sorobanrpc.com',
       FORWARDER_CONTRACT_ID: 'CBZL2IH7F6BIDAA3WBNXYKIXSATJGMSW7K5P5MJ6STX5RXN47TZJDF5T',
     } as any);
     expect(r.trustlineProvider).toBeUndefined();

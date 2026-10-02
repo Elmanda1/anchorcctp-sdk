@@ -1418,7 +1418,7 @@ describe('assertColdStartEnv', () => {
       USDC_ISSUER: 'GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN',
       FORWARDER_CONTRACT_ID: 'CBZL2IH7F6BIDAA3WBNXYKIXSATJGMSW7K5P5MJ6STX5RXN47TZJDF5T',
       HORIZON_URL: 'https://horizon.stellar.org',
-      SOROBAN_RPC_URL: 'https://soroban-mainnet.stellar.org',
+      SOROBAN_RPC_URL: 'https://mainnet.sorobanrpc.com',
       CIRCLE_ATTESTATION_BASE_URL: 'https://iris-api.circle.com',
       KV_REST_API_URL: 'https://example.upstash.io',
       KV_REST_API_TOKEN: 'token',

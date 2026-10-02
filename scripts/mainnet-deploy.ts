@@ -20,7 +20,7 @@ import { Keypair, StrKey } from '@stellar/stellar-sdk';
 import { MAINNET_FORWARDER } from '../packages/core/src/forwarder/index.js';
 
 const HORIZON = 'https://horizon.stellar.org';
-const RPC = 'https://soroban-mainnet.stellar.org';
+const RPC = 'https://mainnet.sorobanrpc.com';
 const ATTEST = 'https://iris-api.circle.com';
 const USDC_ISSUER = 'GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN';
 
