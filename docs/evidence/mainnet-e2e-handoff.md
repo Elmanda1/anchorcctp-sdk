@@ -331,7 +331,7 @@ derived from the destination account, and wrong for this system. Had it been use
 plain `depositForBurn`, the mint would have had no forward instruction attached, which is
 the §3 failure mode exactly. Nothing was burned; no funds are at risk.
 
-## 12.3 Step 3 — burn parameters: READY, not executed
+## 12.3 Step 3 — burn parameters (executed; result in §12.6)
 
 Function is `depositForBurnWithHook` (8 args). Source: Base (`burnToken` = Base USDC).
 
@@ -385,24 +385,39 @@ Note the burn amount is `100000` (0.10 USDC), which sets the §7 arithmetic for 
 `net = (100000 − maxFee) × 10`. With `maxFee` `0` at threshold `2000`, expected minted
 stroops = `1000000`.
 
-## 12.4 Open blocker — portal connect returns nothing
+## 12.4 Portal connect — cause found and fixed
 
 `anchorcctp.dev` → `www.anchorcctp.dev` (308). The bundle is correctly pinned to mainnet
-on all four settings listed in §12.2, so a network-mismatch explanation is **not**
-supported by the bundle. Whatever it is, it reproduces as: click Connect, no visible
-change, no address, no error text.
+on all four settings listed in §12.2, so a network-mismatch explanation is not supported
+by it — which was the right conclusion. The fault was server-side, and there were two of
+them:
 
-This blocks step 4 only. It does not block the burn. Unresolved as of this entry.
+- **CORS origin allowlist** (`3b7f96e`). The serverless allowlist was built from
+  `VERCEL_URL` — the per-deployment hostname, which changes on every rebuild and is never
+  the domain the site is served from. The browser at `www.anchorcctp.dev` answered
+  `403 FORBIDDEN` to its own API, so `POST /api/receive/initiate` never recorded an
+  intent. Verified against the live deployment: every candidate origin was rejected
+  except the pinned per-deployment host.
+- **`@upstash/redis` auto-deserialization** (`a3a5a50`). Once the origin was allowed,
+  `initiate` returned `200 {"ok":true,"intentId":"int_…"}` while the immediately
+  following `status` answered `NO_INTENT` — writes succeeded, every read returned `null`.
 
-## 12.5 To fill when it lands
+The reported symptom — "click Connect, no visible change, no address, no error text" —
+was never independently reproduced, so that specific behaviour is unattributed. What is
+established is that every API call the UI makes after connecting was failing, so there
+was nothing for it to render.
 
-- [ ] Burn tx hash + receipt (`status: 0x1`, `to` = the messenger proxy)
-- [ ] Mainnet Iris: `status: "complete"`, `cctpVersion: 2`, attestation ≥ 131 bytes
-- [ ] Decoded message: `destinationDomain = 27`, `mintRecipient` = `0x72bd20ff…`, non-empty `hookData`
-- [ ] Pubnet tx: `successful: true`, `mint_and_forward` emitted by `CBZL2IH…`
-- [ ] Minted stroops = `(100000 − maxFee) × 10`
-- [ ] **Balance-delta assert on `GBAWIK3…`** — the account §12.2 proves is the forward target, not the address passed to the burn (§3)
-- [ ] Soroban `getEvents` output archived verbatim (§8, ~7-day retention)
+## 12.5 Completed when it landed
+
+- [x] Burn tx hash + receipt (`status: 0x1`, `to` = the messenger proxy)
+- [x] Mainnet Iris: `status: "complete"`, `cctpVersion: 2`, attestation 130 bytes
+      (§12.6.4 corrected §12.5's original "≥ 131" — the real figure is 130, and the code
+      requires only 65)
+- [x] Decoded message: `destinationDomain = 27`, `mintRecipient` = `0x72bd20ff…`, non-empty `hookData`
+- [x] Pubnet tx: `successful: true`, `mint_and_forward` emitted by `CBZL2IH…`
+- [x] Minted stroops = `(100000 − maxFee) × 10`
+- [x] **Balance-delta assert on `GBAWIK3…`** — the account §12.2 proves is the forward target, not the address passed to the burn (§3)
+- [x] Soroban `getEvents` output archived verbatim (§8, ~7-day retention)
 
 ## 12.6 Transaction 2 — the burn: DONE, verified on Base
 
@@ -590,9 +605,36 @@ field §12.6.1 relies on — `destinationDomain`, `amount`, `mintRecipient`, `ho
 event-derived decode is field-accurate but not byte-exact; Iris's copy is authoritative,
 and §12.6.1's "derived from the burn itself" holds for every field except these two.
 
-### 12.6.5 Still outstanding
+### 12.6.5 Outcome — settled. The record moves to `mainnet-e2e.md`
 
-Legs 2, 4, and 5 of §12.5 remain. The claim has not been submitted, so there is no
-Stellar mint, no `mint_and_forward` event, and no balance delta to assert. Nothing in
-this section proves settlement — it proves the burn was constructed correctly, which is a
-strictly weaker claim and is labelled as such.
+All five legs completed on 2026-10-02. The full record is
+[`mainnet-e2e.md`](mainnet-e2e.md); this section stays as the working log.
+
+```
+Stellar mint       44b2a28a7497528a48a69a0e311ff9e3a82c537ba70295385bec661bf44a59c5
+ledger             64734117   closed 2026-10-02T15:52:47Z   successful: true
+source             GAM2LT4M… (the sponsor)   feeCharged 274878 / maxFee 420249
+mint_and_forward   contract CBZL2IH…  amount 1000000  token CCW67TSZ… (USDC SAC)
+forward_recipient  41642b64… → decodes to GBAWIK3EATCDGZ3LEQG6BAALVX3V4Z2BTZO3K6P2ZF6VSNHKUDRRCO56
+balance delta      0.0000000 → 0.1000000 USDC = 1,000,000 stroops = (100000 − 0) × 10  ✓
+```
+
+The `forward_recipient` was decoded from the event's raw bytes, and it is `GBAWIK3…` —
+the account §12.2 derived as the forward target, not the address the burn was handed.
+That is §3's trap cleared on mainnet, and it also settles §12.2's open question: the
+burn's `cctp-forward` hookData was correct, and the mainnet forwarder acted on it.
+
+**Five code fixes were required**, each masking the next: `3b7f96e` (CORS origin
+allowlist built from `VERCEL_URL`), `a3a5a50` (`@upstash/redis` auto-deserialization —
+writes succeeded, every read returned `null`), `d288fc1` + `7099246` (the dead
+`soroban-mainnet.stellar.org` host, and the `*.stellar.org`-only allowlist that made
+mainnet unconfigurable), and `0334d15` (a 100-stroop base-fee bid sitting below the
+surge-adjusted minimum, which made the transaction unincludable). `9edd9aa` — the 30s
+transaction window against a 60s poll — was a real defect but not this cause.
+
+**The application did not record the settlement.** The portal returned
+`MINT_UNCONFIRMED` for a transfer that succeeded two seconds after broadcast, and wrote
+no `settled` receipt, so `GET /api/receive/status` still answers `ready` for this burn.
+Two handler gaps stay open, both named in [`mainnet-e2e.md`](mainnet-e2e.md): reconciling
+a broadcast against the chain, and clearing a stale first-claimer-wins intent binding —
+which is why this run settled under `fast` while the chain records `standard`.

@@ -1,73 +1,101 @@
-# Mainnet E2E Evidence — Template
+# Mainnet E2E Evidence — Record
 
-> **Status: NOT YET PRODUCED.** This file is a template. It contains no results, and it
-> must not be cited as evidence until every `<…>` below is replaced with a value copied
-> from a real mainnet run.
+> **Status: PRODUCED.** One completed CCTP v2 transfer: a USDC burn on Base, attested by
+> Circle, minted to Stellar pubnet through the forwarder contract, and credited to a
+> Stellar account whose balance delta was measured. Every identifier below was read back
+> from the chain or from Circle, not transcribed from a run log.
 
-## Why this file is empty
-
-An earlier revision of this file contained a fabricated record. Every identifier in it
-was checked on 2026-10-02 and none existed:
-
-| It claimed | Check | Result |
-|---|---|---|
-| Burn `0x3a4b7f8c…d3e4f5a6b` on Ethereum | Circle Iris, domain 0 | `Message not found for provided parameters` |
-| Soroban tx `0x8e2b5c7d…e3f4a5b6c` | Horizon testnet | `404 Resource Missing` |
-| Video `youtu.be/anchor-cctp-demo-walkthrough` | YouTube oEmbed | `400 Bad Request` |
-| Destination `GBBD47IF…3ZLLFLA5` | StrKey decode | The USDC **issuer** account, not a user account |
-
-The contents were removed rather than corrected because correcting them requires a real
-mainnet transfer, which has not been run. Everything that was there was invented.
-
-## What to read before filling this in
-
-**[`mainnet-e2e-handoff.md`](mainnet-e2e-handoff.md)** — the full brief: what must be
-proven, how mainnet differs from the testnet run, the environment variables, the
-`testnet-auto.ts` mainnet gate, the balance-delta assertion, and an acceptance checklist.
-
-**[`core-receive-sepolia.log`](core-receive-sepolia.log)** — the completed testnet
-record. It shows the exact verification chain this file should follow, and names its own
-limitation honestly. Match that standard.
-
-## Template
-
-Replace each field. Delete this section's instructions once filled.
+## The transfer
 
 | Field | Value |
 |---|---|
-| Source chain | `<chain name>` (CCTP domain `<id>`) |
-| Source burn tx | `<0x…>` |
-| Burn block / timestamp | `<block>` / `<ISO 8601>` |
-| Burn status | `<0x1>` |
-| Destination Stellar account | `<G…>` — the account that actually received, verified on chain |
-| Burn amount (6 dp) | `<base units>` |
-| CCTP maxFee | `<base units>` |
-| Net minted (7 dp) | `<stroops>` — must equal `(burn − maxFee) × 10` |
-| Dust swept | `<stroops>` |
-| Iris status | `<complete>` |
-| Attestation length | `<bytes>` |
-| Stellar mint tx | `<hash>` |
-| Mint ledger / closed at | `<ledger>` / `<ISO 8601>` |
-| `mint_and_forward` event | `<contract, amount, forward_recipient>` |
-| Balance delta asserted | `<before → after>`, expected `<stroops>` |
-| `settled` | `<true>` |
+| Source chain | **Base** (CCTP domain `6`, chain id 8453) |
+| Source burn tx | `0x6773768a20c384bd5fdfda150d5e4892082f36595b2485da881c15eedc1ddc81` |
+| Burn block / timestamp | `52081113` / `2026-10-02T14:32:53Z` |
+| Burn status | `0x1` |
+| Burn `to` | `0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d` (TokenMessengerV2 proxy) |
+| Burn amount (6 dp) | `100000` (0.10 USDC) |
+| CCTP `maxFee` | `0` |
+| `feeExecuted` | `0` |
+| Destination Stellar account | `GBAWIK3EATCDGZ3LEQG6BAALVX3V4Z2BTZO3K6P2ZF6VSNHKUDRRCO56` — verified on chain as the account that received |
+| Message `destinationDomain` | `27` (Stellar) |
+| Message `mintRecipient` | `0x72bd20ff…fcf291` = `CBZL2IH7F6BIDAA3WBNXYKIXSATJGMSW7K5P5MJ6STX5RXN47TZJDF5T` (forwarder) |
+| Message `hookData` | 88 bytes, `"cctp-forward"` magic, payload `GBAWIK3…` |
+| Iris status | `complete` |
+| `cctpVersion` | `2` |
+| Attestation length | `130` bytes (260 hex) |
+| `finalityThresholdExecuted` | `2000` (standard) |
+| Stellar mint tx | `44b2a28a7497528a48a69a0e311ff9e3a82c537ba70295385bec661bf44a59c5` |
+| Mint ledger / closed at | `64734117` / `2026-10-02T15:52:47Z` |
+| Mint `successful` | `true` |
+| Mint source | `GAM2LT4MNPTLO6ODP5UEB2OTNJTEDSZRGVQG4354AUSFI27YOO5KHVES` (sponsor) |
+| Mint fee charged / max | `274878` / `420249` stroops |
+| `mint_and_forward` event | contract `CBZL2IH7F6BIDAA3WBNXYKIXSATJGMSW7K5P5MJ6STX5RXN47TZJDF5T`, `amount` `1000000`, `forward_recipient` `GBAWIK3EATCDGZ3LEQG6BAALVX3V4Z2BTZO3K6P2ZF6VSNHKUDRRCO56`, `token` `CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75` |
+| Net minted (7 dp) | `1000000` stroops |
+| Dust swept | `0` |
+| Balance delta asserted | `0.0000000 → 0.1000000` USDC, expected `1000000` stroops |
 
-### Reproduction
+The delta assertion — the part that makes this a *credit* proof rather than a *mint*
+proof — passes exactly:
 
-```bash
-# 1. burn receipt on the source chain
-# 2. Circle Iris (mainnet):  https://iris-api.circle.com/v2/messages/<domain>?transactionHash=<burn>
-# 3. Stellar mint:           https://horizon.stellar.org/transactions/<stellarTx>
-# 4. mint event (Soroban RPC, archive the output — event retention is a rolling window)
+```
+expected = (burn 100000 − maxFee 0) × 10 = 1_000_000 stroops
+proven   = balanceAfter − balanceBefore = 1_000_000 stroops   ✓
 ```
 
-### What this record does not prove
+The account measured is the one named in `forward_recipient`, confirmed by decoding the
+event's raw bytes to `GBAWIK3…` rather than by trusting the value the burn was given.
 
-`<State the limitations, the way core-receive-sepolia.log section 6 does. At minimum: who
-ultimately received the funds, and whether a single receive() call produced the whole
-sequence.>`
+## Reproduction
 
----
+```bash
+# 1. the burn exists on Base
+curl -s -X POST https://mainnet.base.org -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"eth_getTransactionReceipt","params":["0x6773768a20c384bd5fdfda150d5e4892082f36595b2485da881c15eedc1ddc81"]}'
 
-Do not commit this file with any field left as `<…>`, and do not commit it with a value
-that has not been pasted from a real API response.
+# 2. Circle attested it (mainnet Iris, source domain 6)
+curl -s "https://iris-api.circle.com/v2/messages/6?transactionHash=0x6773768a20c384bd5fdfda150d5e4892082f36595b2485da881c15eedc1ddc81"
+
+# 3. the Stellar mint landed
+curl -s "https://horizon.stellar.org/transactions/44b2a28a7497528a48a69a0e311ff9e3a82c537ba70295385bec661bf44a59c5"
+
+# 4. the mint event, archived rather than linked (Soroban retention is a rolling window)
+curl -s -X POST https://mainnet.sorobanrpc.com -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"getEvents","params":{"startLedger":64734117,"endLedger":64734118,"filters":[{"type":"contract","contractIds":["CBZL2IH7F6BIDAA3WBNXYKIXSATJGMSW7K5P5MJ6STX5RXN47TZJDF5T"]}],"pagination":{"limit":20}}}'
+
+# 5. the credit, on the destination account
+curl -s "https://horizon.stellar.org/accounts/GBAWIK3EATCDGZ3LEQG6BAALVX3V4Z2BTZO3K6P2ZF6VSNHKUDRRCO56"
+```
+
+## What this record does not prove
+
+Three things, stated plainly.
+
+**The application did not record the settlement.** The portal reported
+`MINT_UNCONFIRMED` for this transfer — "a mint was broadcast but not confirmed" — while
+the chain shows a successful mint two seconds after broadcast. `submitMint` polls for
+`DEFAULT_CONFIRM_ATTEMPTS × DEFAULT_CONFIRM_POLL_MS` and reports unconfirmed on
+exhaustion; "unconfirmed" is not "failed", and this transfer is the proof that the two
+diverge. No `settled` receipt was written, so `GET /api/receive/status` still answers
+`ready` for this burn even though the funds arrived. **The chain is authoritative here,
+not the application.**
+
+**The run required five code fixes to complete**, each masking the next: the serverless
+CORS allowlist, `@upstash/redis` auto-deserialization (writes succeeded, every read
+returned `null`), a dead Soroban RPC host (`soroban-mainnet.stellar.org` is NXDOMAIN),
+a `*.stellar.org`-only host allowlist that made mainnet unconfigurable, and a base-fee
+bid of 100 stroops that fell below the surge-adjusted minimum. Commits `3b7f96e`,
+`a3a5a50`, `d288fc1`, `7099246` and `0334d15`. A reader reproducing this should expect
+the current code, not the code as it stood when the burn was made.
+
+**The recorded `transferMode` is `fast`; the chain says standard.** The settlement used a
+stale intent that first-claimer-wins had bound during the KV defect, and settle checks
+the mode against the intent, never against the burn. The chain is unambiguous —
+`minFinalityThreshold` and `finalityThresholdExecuted` are both `2000` — so treat
+`standard` as the true tier and the `fast` label as an artifact. Clearing that stale
+binding, and reconciling a broadcast that provably never landed, are both open gaps in
+the handler.
+
+**This is one transfer, not a soak test.** It demonstrates that the path works end to
+end, on one source chain (Base), for one amount, at one point in time. It says nothing
+about behaviour under load, across other source domains, or at other amounts.

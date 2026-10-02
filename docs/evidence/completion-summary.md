@@ -24,7 +24,7 @@ block and the `mint_and_forward` interface.
 |---|---|---|
 | D1 — Core SDK (`@anchor-cctp/core-sdk`), single `receive()` API | **Done** | npm package; coverage ([L01](coverage.md)); testnet settlement record ([L02](core-receive-sepolia.log)) |
 | D2 — CLI (`@anchor-cctp/cli`): `init`, `listen`, `verify`, `domains` | **Done, one named gap** | npm package; recordings [L03](cli-domains.gif)–[L06](cli-verify.gif); `listen` recorded with `--simulate` ([L05](cli-listen.gif)); JSON + error branches re-recorded 2026-10-02 on 1.0.2 ([L07](cli-commands.log)) |
-| D3 — Demo anchor, Freighter UI, SEP-CCTP PR, walkthrough video | **Partial** | Portal + docs live ([L09](ui-demo-portal.png), [L10](ui-docs-site.png)); live `stellar.toml` carries mainnet values ([L08](demo-deploy.md)); SEP PR [L12](sep-pr-link.md); 4:09 walkthrough video. Mainnet E2E not produced ([L13](mainnet-e2e.md)); settle API unhealthy; cancelled/credit shots pending |
+| D3 — Demo anchor, Freighter UI, SEP-CCTP PR, walkthrough video | **Partial** | Portal + docs live ([L09](ui-demo-portal.png), [L10](ui-docs-site.png)); live `stellar.toml` carries mainnet values ([L08](demo-deploy.md)); SEP PR [L12](sep-pr-link.md); 4:09 walkthrough video. Mainnet E2E now produced ([L13](mainnet-e2e.md)) — the portal reported failure for a transfer that settled, and the video predates it; cancelled/credit shots pending |
 | Overall — completion summary + walkthrough video | Summary: this document. Video: [walkthrough](https://youtu.be/jTVbVezrICM) | — |
 
 ## What "done" means here
@@ -50,11 +50,14 @@ than rounding them up:
   `mintRecipient` is Circle's forwarder contract, and the forwarder's `forward_recipient`
   is the demo's sponsor account. The recorded destination and the settled destination do
   not match; see [L02 §6](core-receive-sepolia.log).
-- **No mainnet transfer.** An earlier `mainnet-e2e.md` contained a fabricated record;
-  every identifier in it was checked on 2026-10-02 and none existed, so the contents were
-  deleted. What the mainnet leg must prove and how a reviewer checks it is specified in
-  [the handoff brief](mainnet-e2e-handoff.md).
-- **Open:** no mainnet transfer (skipped by builder decision), no cancelled/credit screenshots.
+- **A mainnet transfer settled, but the application did not record it.** On 2026-10-02
+  0.10 USDC burned on Base settled to Stellar pubnet with the correct end-user balance
+  delta — the gap in the item above, closed ([L13](mainnet-e2e.md)). The portal returned
+  `MINT_UNCONFIRMED` for it and wrote no `settled` receipt, so reconciling a broadcast
+  against the chain remains unimplemented; completing the run required five code fixes,
+  all listed in the record.
+- **Open:** application reconciliation of a settled transfer (the portal reports
+  `MINT_UNCONFIRMED` for one that succeeded on chain), no cancelled/credit screenshots.
 - **`listen` is recorded with `--simulate`**, so its output shape is real but it is not a
   live Horizon stream ([L05](cli-listen.gif)).
 - **No captured Freighter session, and no `receive()` runtime stdout.** [L02](core-receive-sepolia.log)
