@@ -345,14 +345,18 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
       });
       const body = (await res.json().catch(() => ({}))) as {
         receipt?: { stellarAmount?: string; mintTxHash?: string; dust?: string };
-        error?: { code?: string; remediation?: string };
+        error?: { code?: string; remediation?: string; detail?: string };
       };
       if (!res.ok) {
         finishRun();
+        // `fail()` in handlers.ts carries the upstream cause in `detail`; without it a 502
+        // reads as "Receive failed. Retry later." and the real fault stays invisible.
+        const why = body?.error?.remediation ?? `Settle failed (${res.status})`;
+        const detail = body?.error?.detail;
         setDeposit((s) =>
           reduceDeposit(s, {
             type: 'error',
-            message: body?.error?.remediation ?? `Settle failed (${res.status})`,
+            message: detail ? `${why} — ${detail}` : why,
           }),
         );
         return;

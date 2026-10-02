@@ -63,6 +63,14 @@ const demoEnv = readEnvFile(join(demoDir, '.env'));
 serverEnv.CIRCLE_ATTESTATION_BASE_URL ??=
   demoEnv.CIRCLE_ATTESTATION_BASE_URL ?? demoEnv.VITE_ATTESTATION_URL;
 
+// Same VITE_/server split as the attestation URL: core reads the bare names, the demo
+// env only defines the VITE_ ones. Left unset, the forwarder silently falls back to
+// core's TESTNET_FORWARDER default instead of the contract this config names.
+serverEnv.FORWARDER_CONTRACT_ID ??=
+  demoEnv.FORWARDER_CONTRACT_ID ?? demoEnv.VITE_FORWARDER_CONTRACT_ID;
+serverEnv.DUST_COLLECTOR_ADDRESS ??=
+  demoEnv.DUST_COLLECTOR_ADDRESS ?? demoEnv.VITE_DUST_COLLECTOR_ADDRESS;
+
 const procs = [
   spawn('node', ['dist-server/serve.cjs'], {
     env: { ...serverEnv, SIM_MODE: serverEnv.SIM_MODE ?? 'false', PORT: serverEnv.PORT ?? '3001' },
