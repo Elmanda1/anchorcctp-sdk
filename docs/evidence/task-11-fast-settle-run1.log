@@ -1,9 +1,0 @@
-[STEP] [burn] maxFee=13 quoted 1.3bps (threshold 1000) mode=fast
-[STEP] [burn] evm=0xEDD1b3b72e41D16425075Eabe699612FE22C0e63 chain=84532 amount=100000 maxFee=13 mode=fast
-[EVENT] [burn] txHash=0xdbdba22c689f112ada2138080bd83e796a5024bc52a4964de954e515a96612ef
-[INFO] account funded, USDC balance before=0.0000000
-[INFO] forwarder live (ledger ?)
-[STEP] [receive] domain=6 amount=100000
-[INFO] account funded, USDC balance before=0.0000000
-[INFO] forwarder live (ledger ?)
-[STEP] [receive] domain=6 amount=100000
