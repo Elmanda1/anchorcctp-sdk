@@ -635,6 +635,10 @@ transaction window against a 60s poll — was a real defect but not this cause.
 **The application did not record the settlement.** The portal returned
 `MINT_UNCONFIRMED` for a transfer that succeeded two seconds after broadcast, and wrote
 no `settled` receipt, so `GET /api/receive/status` still answers `ready` for this burn.
-Two handler gaps stay open, both named in [`mainnet-e2e.md`](mainnet-e2e.md): reconciling
-a broadcast against the chain, and clearing a stale first-claimer-wins intent binding —
-which is why this run settled under `fast` while the chain records `standard`.
+That is closed in `43ff455`: `handleSettle` now asks the chain about the recorded
+broadcast hash before refusing, and closes the record out as settled when the mint did in
+fact succeed — so settling this burn again records it. Two related gaps stay open, both
+named in [`mainnet-e2e.md`](mainnet-e2e.md): clearing a stale first-claimer-wins intent
+binding (which is why this run settled under `fast` while the chain records `standard`),
+and releasing a broadcast whose hash is provably absent from the chain so it can be
+retried.

@@ -50,14 +50,16 @@ than rounding them up:
   `mintRecipient` is Circle's forwarder contract, and the forwarder's `forward_recipient`
   is the demo's sponsor account. The recorded destination and the settled destination do
   not match; see [L02 §6](core-receive-sepolia.log).
-- **A mainnet transfer settled, but the application did not record it.** On 2026-10-02
-  0.10 USDC burned on Base settled to Stellar pubnet with the correct end-user balance
-  delta — the gap in the item above, closed ([L13](mainnet-e2e.md)). The portal returned
-  `MINT_UNCONFIRMED` for it and wrote no `settled` receipt, so reconciling a broadcast
-  against the chain remains unimplemented; completing the run required five code fixes,
-  all listed in the record.
-- **Open:** application reconciliation of a settled transfer (the portal reports
-  `MINT_UNCONFIRMED` for one that succeeded on chain), no cancelled/credit screenshots.
+- **A mainnet transfer settled, and the application initially did not record it.** On
+  2026-10-02 0.10 USDC burned on Base settled to Stellar pubnet with the correct
+  end-user balance delta — the gap in the item above, closed ([L13](mainnet-e2e.md)).
+  The portal returned `MINT_UNCONFIRMED` and wrote no `settled` receipt; `43ff455` now
+  reconciles a broadcast against the chain, so the transfer is recordable by
+  re-settling. Completing the run required five further code fixes, all listed in the
+  record.
+- **Open:** clearing a stale first-claimer-wins intent binding, releasing a broadcast
+  whose hash is provably absent from the chain so it can be retried, and no
+  cancelled/credit screenshots.
 - **`listen` is recorded with `--simulate`**, so its output shape is real but it is not a
   live Horizon stream ([L05](cli-listen.gif)).
 - **No captured Freighter session, and no `receive()` runtime stdout.** [L02](core-receive-sepolia.log)

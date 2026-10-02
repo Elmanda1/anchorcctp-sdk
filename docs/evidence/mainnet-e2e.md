@@ -80,6 +80,14 @@ diverge. No `settled` receipt was written, so `GET /api/receive/status` still an
 `ready` for this burn even though the funds arrived. **The chain is authoritative here,
 not the application.**
 
+That gap is now closed in `43ff455`: `handleSettle` asks the chain about the recorded
+broadcast hash before refusing, and closes the record out as settled when the mint did in
+fact succeed. Settling this burn again therefore *records* it — a retry that previously
+returned `MINT_UNCONFIRMED` now returns the receipt. The paragraph above is kept as the
+state at the time of the run, because that is what the run demonstrated: the portal can
+report failure for a transfer that settled, and until `43ff455` nothing reconciled the
+two.
+
 **The run required five code fixes to complete**, each masking the next: the serverless
 CORS allowlist, `@upstash/redis` auto-deserialization (writes succeeded, every read
 returned `null`), a dead Soroban RPC host (`soroban-mainnet.stellar.org` is NXDOMAIN),
@@ -92,9 +100,12 @@ the current code, not the code as it stood when the burn was made.
 stale intent that first-claimer-wins had bound during the KV defect, and settle checks
 the mode against the intent, never against the burn. The chain is unambiguous —
 `minFinalityThreshold` and `finalityThresholdExecuted` are both `2000` — so treat
-`standard` as the true tier and the `fast` label as an artifact. Clearing that stale
-binding, and reconciling a broadcast that provably never landed, are both open gaps in
-the handler.
+`standard` as the true tier and the `fast` label as an artifact.
+
+Two handler gaps remain. Clearing a stale first-claimer-wins binding, which is what let a
+`fast` intent hold this `standard` burn. And letting a broadcast whose hash is *provably
+absent* from the chain be retried, rather than held as an unconfirmed item indefinitely —
+reconciling a broadcast that did land is closed above, but the other half is not.
 
 **This is one transfer, not a soak test.** It demonstrates that the path works end to
 end, on one source chain (Base), for one amount, at one point in time. It says nothing
