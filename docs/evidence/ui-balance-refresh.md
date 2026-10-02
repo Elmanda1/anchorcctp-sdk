@@ -1,6 +1,8 @@
-# Task 5c — Balance Refresh + Error Simulation Panel
+# Demo UI: Balance Refresh and Error Simulation Panel
 
-## Status: DONE
+**Date:** 2026-10-02
+**Package versions:** `@anchor-cctp/core-sdk@1.0.1`, `@anchor-cctp/cli@1.0.1` (demo workspace `apps/demo`)
+**Status:** Done
 
 ## What Changed
 
@@ -32,10 +34,14 @@ No fake timers. Each toggle executes genuine failing path.
 
 ## Verification
 
-- `npm run typecheck` → clean
-- `npm run lint` → clean
-- `npm run test` → 161 passed, 0 failed
-- `npm run build --workspace=@anchor-cctp/demo` → builds (1,173 kB JS bundle)
+Commands run from the repo root:
+
+| Command | Result |
+|---|---|
+| `npm run typecheck` | Clean, no errors |
+| `npm run lint` | Clean, no errors |
+| `npx jest` | 363 passed, 3 skipped, 0 failed (31 passed suites) |
+| `npm run build --workspace=@anchor-cctp/demo` | Builds, 1,173 kB JS bundle |
 - Core SDK must be built first (`npm run build --workspace=@anchor-cctp/core-sdk`)
 
 ## Manual Verification (requires browser + Freighter)

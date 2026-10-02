@@ -1,32 +1,183 @@
-=== AnchorCCTP.receive() Testnet Execution Log ===
-Timestamp: 2026-09-10T08:18:30.000Z
-Network: Stellar Testnet (pubnet CCTP domain 27)
-Source Domain: 6 (Base Sepolia)
-Burn Tx: 0x35687770176d655848c41804f9814467d0ea378877ca6b6b7a2d80d196fc9df9
-Destination: GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5
+=== Cross-Chain Settlement Evidence: Base Sepolia -> Stellar Testnet ===
+Recorded:   2026-10-02
+Source:     Base Sepolia (CCTP domain 6)
+Destination: Stellar Testnet (CCTP domain 27)
+Package:    @anchor-cctp/core-sdk@1.0.1
 
-[BALANCE BEFORE] Account GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5 USDC balance: 100.0000000 USDC
+This file is a verification record, not a captured stdout of a live `receive()` call.
+Every value below was re-derived on 2026-10-02 from the public APIs named next to it,
+using the reproduction commands in section 7. Nothing here is hand-written sample data.
 
-[STEP 1] [domains] Source domain verified {"sourceDomain":6,"chain":"Base Sepolia"}
-[STEP 2] [decimals] Amount validated (> 0n) {"amountCctp":"10000001","usdcFormatted":"10.000001"}
-[STEP 3] [replay] Replay guard check passed {"burnTxHash":"0x35687770176d655848c41804f9814467d0ea378877ca6b6b7a2d80d196fc9df9","processed":false}
-[STEP 4] [address] Translated EVM 32-byte bytes32 to Stellar G... account {"evmRaw":"0x000000000000000000000000...55","stellarAddress":"GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"}
-[STEP 5] [attestation] Polling Circle Attestation API {"burnTxHash":"0x35687770176d655848c41804f9814467d0ea378877ca6b6b7a2d80d196fc9df9","attempt":1,"backoffMs":1000,"jitterMs":142,"elapsedMs":1142,"status":"pending"}
-[EVENT] [onReceiving] {"burnTxHash":"0x35687770176d655848c41804f9814467d0ea378877ca6b6b7a2d80d196fc9df9","status":"attesting","attempt":1,"elapsedTimeMs":1142,"sourceDomain":6}
-[STEP 5] [attestation] Polling Circle Attestation API {"burnTxHash":"0x35687770176d655848c41804f9814467d0ea378877ca6b6b7a2d80d196fc9df9","attempt":2,"backoffMs":1500,"jitterMs":210,"elapsedMs":2852,"status":"pending"}
-[EVENT] [onReceiving] {"burnTxHash":"0x35687770176d655848c41804f9814467d0ea378877ca6b6b7a2d80d196fc9df9","status":"attesting","attempt":2,"elapsedTimeMs":2852,"sourceDomain":6}
-[STEP 5] [attestation] Polling Circle Attestation API {"burnTxHash":"0x35687770176d655848c41804f9814467d0ea378877ca6b6b7a2d80d196fc9df9","attempt":3,"backoffMs":2250,"jitterMs":88,"elapsedMs":5190,"status":"complete"}
-[EVENT] [onReceiving] {"burnTxHash":"0x35687770176d655848c41804f9814467d0ea378877ca6b6b7a2d80d196fc9df9","status":"attesting","attempt":3,"elapsedTimeMs":5190,"sourceDomain":6}
-[STEP 6] [attestation] Attestation cryptographically verified {"status":"complete","signatureValid":true,"publicKeysMatched":true}
-[STEP 7] [trustline] Trustline missing — created USDC trustline on Testnet {"account":"GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5","asset":"USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5","limit":"100000000.0000000"}
-[STEP 8] [forwarder] Submitted Soroban CCTP mint call {"contractId":"CCCTPMINTFORWARDER123456789012345678901234567890123456789","recipient":"GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5","amountStroops":"100000010","sorobanTxHash":"a1b2c3d4e5f678901234567890abcdef1234567890abcdef1234567890abcdef"}
-[STEP 9] [decimals] 6 -> 7 decimal conversion computed {"amountCctp6":"10000001","amountStellar7":"100000010","multiplier":10,"dustStroops":"0"}
-[STEP 9] [decimals] 7 -> 6 decimal dust math demonstration {"inputStroops7":"10000003","outputCctp6":"1000000","dustStroops":"3","dustCollector":"GDUSTCOLLECTORTERMSANDCONDITIONSACCEPTANCEKEEPERX"}
-[EVENT] [onDustCollected] {"amount":"3","collector":"GDUSTCOLLECTORTERMSANDCONDITIONSACCEPTANCEKEEPERX","originalTxHash":"0x35687770176d655848c41804f9814467d0ea378877ca6b6b7a2d80d196fc9df9"}
-[EVENT] [onSettled] {"amount":"100000010","dust":"0","txHash":"a1b2c3d4e5f678901234567890abcdef1234567890abcdef1234567890abcdef","sourceDomain":6,"destinationAddress":"GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5","timestamp":"2026-09-10T08:18:30.000Z"}
-[STEP 10] [events] onSettled and onDustCollected events dispatched
-[STEP 11] [replay] Transaction marked as processed in ReplayStore and result returned {"burnTxHash":"0x35687770176d655848c41804f9814467d0ea378877ca6b6b7a2d80d196fc9df9","resultObj":{"settled":true,"txHash":"a1b2c3d4e5f678901234567890abcdef1234567890abcdef1234567890abcdef","amount":"100000010","recipient":"GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"}}
+Two completed deposits are covered: BURN A and BURN B.
 
-[BALANCE AFTER] Account GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5 USDC balance: 110.0000010 USDC
+------------------------------------------------------------------------------
+1. SOURCE BURN  (verified via https://sepolia.base.org JSON-RPC)
+------------------------------------------------------------------------------
 
-=== Execution Completed Successfully ===
+[BURN A]
+  txHash       0x39e8bd0cdb0326d2847391e2abf7cd3573a59110f25c0c86f64b7dd7acad2acd
+  block        47546642
+  timestamp    2026-10-01T13:32:52Z
+  status       0x1 (success)
+  from         0xedd1b3b72e41d16425075eabe699612fe22c0e63
+  to           0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa  (Circle TokenMessengerV2)
+
+[BURN B]
+  txHash       0x89f69bc36b1830da999f9a300dd2dd08499e1faf6b44d0157091f18b1944f6e2
+  block        47546622
+  timestamp    2026-10-01T13:32:12Z
+  status       0x1 (success)
+  from         0xedd1b3b72e41d16425075eabe699612fe22c0e63
+  to           0x8fe6b999dc680ccfdd5bf7eb0974218be2542daa  (Circle TokenMessengerV2)
+
+------------------------------------------------------------------------------
+2. ATTESTATION  (verified via https://iris-api-sandbox.circle.com)
+------------------------------------------------------------------------------
+
+GET /v2/messages/6?transactionHash=<burnHash>
+
+                        BURN A                                BURN B
+  status                complete                              complete
+  cctpVersion           2                                     2
+  message               non-null, 465 bytes                   non-null, 465 bytes
+  attestation           131 bytes (262 hex)                   131 bytes (262 hex)
+  eventNonce            0x762bc041df5f4694...ca015            0x70a94713e9096f5...dd844
+
+------------------------------------------------------------------------------
+3. CCTP MESSAGE DECODE  (message hex parsed field by field)
+------------------------------------------------------------------------------
+
+Field offsets follow the CCTP v2 MessageV2 layout. All three independent sanity
+checks on the decode -- burnToken, amount, and maxFee -- agree with the on-chain
+burn and the mint event in section 4.
+
+  version             00000001
+  sourceDomain        00000006   ->  6  (Base Sepolia)
+  destinationDomain   0000001b   -> 27  (Stellar)
+  nonce               <matches eventNonce from section 2>
+  sender              0000000000000000000000008fe6b999dc680ccfdd5bf7eb0974218be2542daa
+  recipient           da6f9ee0786c812344d82817ef19b648b4af120f8bd10bf658e6b99eacff24b8
+  destinationCaller   3de86ac50b47eaf2840fe23e48179551660fd1072fba6f445d4a6bd7af4ab93e
+  minFinalityThreshold 000003e8  -> 1000
+  finalityThresholdExecuted 000003e8 -> 1000
+
+  body.version        00000001
+  body.burnToken      000000000000000000000000036cbd53842c5426634e7929541ec2318f3dcf7e
+                      (= 0x036CbD53842c5426634e7929541eC2318f3dCF7e, the canonical
+                       Base Sepolia USDC contract)
+  body.mintRecipient  3de86ac50b47eaf2840fe23e48179551660fd1072fba6f445d4a6bd7af4ab93e
+                      (= C-address CA66Q2WFBND6V4UEB7RD4SAXSVIWMD6RA4X3U32ELVFGXV5PJK4T4VSZ,
+                       Circle's CCTP forwarder contract on Stellar -- a Soroban contract,
+                       not the end-user account)
+  body.amount         00000000000000000000000000000000000000000000000000000000000f4240
+                      -> 1000000  (1.000000 USDC, 6 decimals)
+  body.maxFee         130
+
+------------------------------------------------------------------------------
+4. STELLAR SETTLEMENT  (verified via https://soroban-testnet.stellar.org and
+                        https://horizon-testnet.stellar.org)
+------------------------------------------------------------------------------
+
+[BURN A]
+  stellarTxHash  e6e0c7c44ede033c74cea1e15f131ea6a6248674ec6cf69c50b5d837a8143ccd
+  ledger         4969340
+  closedAt       2026-10-01T15:58:07Z
+  successful     true
+  operation      invoke_host_function (Soroban contract invocation)
+  event emitted  by contract CA66Q2WFBND6V4UEB7RD4SAXSVIWMD6RA4X3U32ELVFGXV5PJK4T4VSZ
+                 topic  sym: mint_and_forward
+                 amount i128: 9998700
+                 forward_recipient G: GCX2EQXSPCHMBSEGYZRVTZWOIDRXWRWYEFRTCNVOZPYXE4QEFPKNUF3V
+                 token  C: CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA
+
+[BURN B]
+  stellarTxHash  e1898f605e9dd042aa80cc63594b65403278fd6c996ca28885a9745e4afa1467
+  ledger         4969364
+  closedAt       2026-10-01T16:00:07Z
+  successful     true
+  operation      invoke_host_function (Soroban contract invocation)
+  event emitted  mint_and_forward, amount i128: 9998700,
+                 forward_recipient GCX2EQXSPCHMBSEGYZRVTZWOIDRXWRWYEFRTCNVOZPYXE4QEFPKNUF3V
+
+------------------------------------------------------------------------------
+5. DECIMAL CONVERSION, VERIFIED AGAINST THE CHAIN
+------------------------------------------------------------------------------
+
+The 6-decimal to 7-decimal (stroop) conversion is checkable end to end, because
+the mint event reports the amount the forwarder actually credited:
+
+  CCTP amount (6 dp)                      1_000_000
+  less maxFee                                - 130
+  net amount (6 dp)                         999_870
+  x 10 to Stellar stroops (7 dp)          9_998_700   <- event reports 9_998_700
+
+  net amount in USDC                        0.9998700
+  fee retained by Circle                    0.0000130
+
+The event's `amount` matches the arithmetic exactly, so the conversion the SDK
+performs is the same one the on-chain forwarder performed. No dust arises from
+this pair: 999_870 is an exact multiple of 1, so the remainder after 6->7
+scaling is 0 stroops.
+
+------------------------------------------------------------------------------
+6. WHAT THIS PROVES, AND WHAT IT DOES NOT
+------------------------------------------------------------------------------
+
+Proves:
+  - Two real USDC burns on Base Sepolia addressed to CCTP destination domain 27.
+  - Circle Iris returns status `complete` with a non-null 465-byte message and a
+    131-byte attestation for both, so the transfers are attestable and settled.
+  - Both messages carry destination domain 27, burnToken = Base Sepolia USDC, and
+    amount 1_000_000, matching the burns.
+  - Both Stellar testnet mint transactions are `successful` and emit
+    `mint_and_forward` from the same contract named as `mintRecipient` in the
+    message, so the two sides are provably the same transfer.
+  - The minted amount 9_998_700 stroops equals (1_000_000 - 130) x 10, confirming
+    the 6-to-7 decimal conversion on chain.
+
+Does not prove:
+  - Final credit to an end-user account. `forward_recipient` is
+    GCX2EQXSPCHMBSEGYZRVTZWOIDRXWRWYEFRTCNVOZPYXE4QEFPKNUF3V, the demo's sponsor
+    account. The USDC lands there first; an onward transfer to an end user is a
+    separate step and is not evidenced in this file.
+  - That these were produced by a single `receive()` invocation. The two burns and
+    two mints are the on-chain artifacts; the SDK's own orchestration over them is
+    covered by the test suite (see coverage.md).
+  - Anything about account GB2F4NE3YMIVJ7526XJ6G2T3UO3MGQX5WKQUUUPKJ3I62FCL476TXMHO,
+    which `apps/demo/data/replay.json` records as the destination for these burns.
+    That account's 4,747.5095182 USDC arrived on 2026-10-01T15:56:47Z via
+    `path_payment_strict_send` on the Stellar DEX (debit 4,999.1378950 XLM), not
+    via CCTP. It has no USDC payment from the sponsor and no CCTP mint. The
+    recorded destination and the settled destination do not match.
+
+------------------------------------------------------------------------------
+7. REPRODUCTION
+------------------------------------------------------------------------------
+
+Burn receipt on Base Sepolia:
+
+  curl -s -X POST https://sepolia.base.org -H 'content-type: application/json' \
+    -d '{"jsonrpc":"2.0","id":1,"method":"eth_getTransactionReceipt","params":["0x39e8bd0cdb0326d2847391e2abf7cd3573a59110f25c0c86f64b7dd7acad2acd"]}'
+
+Attestation:
+
+  curl -s "https://iris-api-sandbox.circle.com/v2/messages/6?transactionHash=0x39e8bd0cdb0326d2847391e2abf7cd3573a59110f25c0c86f64b7dd7acad2acd"
+
+Stellar transaction:
+
+  curl -s "https://horizon-testnet.stellar.org/transactions/e6e0c7c44ede033c74cea1e15f131ea6a6248674ec6cf69c50b5d837a8143ccd"
+
+Mint event (Soroban RPC; ledger range must include 4969340):
+
+  curl -s -X POST https://soroban-testnet.stellar.org -H 'content-type: application/json' \
+    -d '{"jsonrpc":"2.0","id":1,"method":"getEvents","params":{"startLedger":4969340,"endLedger":4969341,"filters":[{"type":"contract"}],"pagination":{"limit":10000}}}'
+
+Or with the CLI:
+
+  npx @anchor-cctp/cli@1.0.2 verify 0x39e8bd0cdb0326d2847391e2abf7cd3573a59110f25c0c86f64b7dd7acad2acd --source-domain 6 --testnet
+
+Note on Soroban RPC: event retention is a rolling window (roughly 7 days on
+testnet). Once ledger 4969340 falls out of it, the getEvents call above returns an
+empty set and only the Horizon and Iris lookups remain reproducible.
+
+=== End of record ===
