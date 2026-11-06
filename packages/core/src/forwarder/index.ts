@@ -146,8 +146,12 @@ export function translateToStellar(evmAddress: string): string {
 
   const trimmed = evmAddress.trim();
 
-  // If already a valid Stellar public key, return as is
-  if (StrKey.isValidEd25519PublicKey(trimmed)) {
+  // If already a valid Stellar G..., M... (muxed), or C... (contract) address, return as is
+  if (
+    StrKey.isValidEd25519PublicKey(trimmed) ||
+    StrKey.isValidMed25519PublicKey(trimmed) ||
+    StrKey.isValidContract(trimmed)
+  ) {
     return trimmed;
   }
 

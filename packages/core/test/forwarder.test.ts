@@ -38,6 +38,15 @@ describe('Forwarder & Address Translation', () => {
     expect(translateToStellar(validG)).toBe(validG);
   });
 
+  it('translateToStellar preserves already-valid Stellar M-addresses (muxed)', () => {
+    const validM = 'MCX2EQXSPCHMBSEGYZRVTZWOIDRXWRWYEFRTCNVOZPYXE4QEFPKNUAAAAAAAAAAAABFBI';
+    expect(translateToStellar(validM)).toBe(validM);
+  });
+
+  it('translateToStellar preserves already-valid Stellar C-addresses (contract)', () => {
+    expect(translateToStellar(TESTNET_FORWARDER)).toBe(TESTNET_FORWARDER);
+  });
+
   it('translateToStellar handles 20-byte addresses padded to 32 bytes', () => {
     const raw20 = '0x' + 'aa'.repeat(20);
     const g = translateToStellar(raw20);

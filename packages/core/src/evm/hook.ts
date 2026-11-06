@@ -22,11 +22,6 @@ export function buildCctpForwarderHookData(forwardRecipientStrkey: string): `0x$
     throw new Error(`Invalid forward recipient: ${forwardRecipientStrkey}`);
   }
 
-  // M... (muxed) has no contract encoding — reject explicitly instead of falling into decodeContract.
-  if (kind === 'med25519') {
-    throw new Error(`Muxed M... recipients unsupported for CCTP hookData: ${forwardRecipientStrkey}`);
-  }
-
   const recipientBytes = Buffer.from(forwardRecipientStrkey, 'utf8');
   const hookData = Buffer.alloc(32 + recipientBytes.length);
   hookData.writeUInt32BE(0, 24);

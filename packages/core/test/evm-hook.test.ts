@@ -39,8 +39,14 @@ describe('buildCctpForwarderHookData', () => {
     expect(bytes.subarray(32).toString('utf8')).toBe(FWD);
   });
 
-  test('rejects muxed M... explicitly instead of falling into contract decode', () => {
-    expect(() => buildCctpForwarderHookData(DEST_MUXED)).toThrow(/muxed/i);
+  test('encodes muxed M... recipient to the Circle utf8 layout (length 69)', () => {
+    const out = buildCctpForwarderHookData(DEST_MUXED);
+    const bytes = Buffer.from(out.slice(2), 'hex');
+    expect(bytes.length).toBe(32 + 69);
+    expect(bytes.subarray(0, 24).every((b) => b === 0)).toBe(true);
+    expect(bytes.readUInt32BE(24)).toBe(0); // version 0
+    expect(bytes.readUInt32BE(28)).toBe(69); // length 69
+    expect(bytes.subarray(32).toString('utf8')).toBe(DEST_MUXED);
   });
 
   test('rejects garbage recipient (fund-loss guard)', () => {

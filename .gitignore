@@ -12,7 +12,9 @@ packages/*/coverage/
 .DS_Store
 .worktrees/
 /stellar.toml
-docs/superpowers/
+docs/superpowers/*
+!docs/superpowers/plans
+!docs/superpowers/specs
 docs/evidence/testnet-auto.processed.json
 docs/evidence/coverage-report.html
 scripts/dist/
