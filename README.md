@@ -25,12 +25,17 @@ anchorcctp-sdk/
 │   ├── core/              # @anchor-cctp/core-sdk Engine (96.5% lines / 91.5% branches)
 │   └── cli/               # @anchor-cctp/cli terminal command suite (100% lines / 94.1% branches)
 ├── apps/
-│   └── demo/              # Interactive Freighter-integrated CCTP deposit portal
-└── docs/
-    ├── SEP-CCTP.md        # Standard proposal draft for Stellar ecosystem anchors
-    ├── api-reference.md   # Full TypeScript API reference
-    ├── migration-guide.md # Migration guide for existing anchors
-    └── evidence/          # Verification logs, test receipts, and deployment proofs
+│   ├── demo/              # Interactive Freighter-integrated CCTP deposit portal
+│   └── docs/              # VitePress documentation portal
+├── docs/
+│   ├── README.md          # Master documentation portal & index
+│   ├── SEP-CCTP.md        # Standard proposal draft for Stellar ecosystem anchors
+│   ├── LOGIC_PROOF.md     # Formal logic specifications and mathematical proofs
+│   ├── api-reference.md   # Full TypeScript API reference
+│   ├── migration-guide.md # Migration guide for existing anchors
+│   ├── SECURITY-REVIEW.md # Threat model, attack trees, and mitigations
+│   └── evidence/          # Verification logs, test receipts, and deployment proofs
+└── RELEASE-1.0-CHECKLIST.md # Release 1.0 preparation checklist & parity brief
 ```
 
 ---

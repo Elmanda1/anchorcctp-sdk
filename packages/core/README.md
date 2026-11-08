@@ -196,7 +196,7 @@ try {
 - **Attestation Gate**: Mandatory cryptographic verification of Iris attestation signatures before contract interaction.
 - **Replay Store**: Atomic check-and-set idempotency store ensures $|R(H)| \le 1$ for any transaction hash $H$.
 
-For formal mathematical proofs, see [LOGIC_PROOF.md](../../LOGIC_PROOF.md) and [Test Coverage Report](../../docs/evidence/coverage.md).
+For formal mathematical proofs, see [LOGIC_PROOF.md](../../docs/LOGIC_PROOF.md) and [Test Coverage Report](../../docs/evidence/coverage.md).
 
 ---
 
