@@ -1,6 +1,6 @@
 # PRD Requirements & Project Scope Bindings
 
-This rule enforces strict alignment with [PRD.md](file:///c:/Users/lunox/Documents/anchorcctp-sdk/PRD.md).
+This rule enforces strict alignment with [docs/PRD.md](file:///c:/Users/lunox/Documents/anchorcctp-sdk/docs/PRD.md).
 
 ## 1. Project Context
 - **Name**: AnchorCCTP SDK

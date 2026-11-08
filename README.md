@@ -29,13 +29,14 @@ anchorcctp-sdk/
 │   └── docs/              # VitePress documentation portal
 ├── docs/
 │   ├── README.md          # Master documentation portal & index
+│   ├── PRD.md             # Canonical requirements & scope specifications
 │   ├── SEP-CCTP.md        # Standard proposal draft for Stellar ecosystem anchors
 │   ├── LOGIC_PROOF.md     # Formal logic specifications and mathematical proofs
 │   ├── api-reference.md   # Full TypeScript API reference
 │   ├── migration-guide.md # Migration guide for existing anchors
 │   ├── SECURITY-REVIEW.md # Threat model, attack trees, and mitigations
+│   ├── RELEASE-1.0-PREPARATION.md # Release 1.0 checklist & parity notes
 │   └── evidence/          # Verification logs, test receipts, and deployment proofs
-└── RELEASE-1.0-CHECKLIST.md # Release 1.0 preparation checklist & parity brief
 ```
 
 ---

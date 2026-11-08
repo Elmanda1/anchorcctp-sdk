@@ -5,10 +5,10 @@ repo. It is the operating contract: how to structure work, what "done" means, an
 never acceptable to ship. Compatible with Claude Code / any `AGENTS.md`-aware tool — rename or
 symlink to `CLAUDE.md` if your tool expects that filename.
 
-## 0. Project Context (read PRD.md first)
+## 0. Project Context (read docs/PRD.md first)
 
-Full requirements live in `PRD.md`. This file only covers *how to work*, not *what to build*.
-If a request conflicts with `PRD.md` §4.2 (Out of Scope), stop and flag it — don't silently
+Full requirements live in `docs/PRD.md`. This file only covers *how to work*, not *what to build*.
+If a request conflicts with `docs/PRD.md` §4.2 (Out of Scope), stop and flag it — don't silently
 implement out-of-scope work even if it seems helpful.
 
 ## 1. TDD Is Mandatory, Not Optional
@@ -56,7 +56,7 @@ with a caveat buried in the description.
 
 ## 3. Directory & Package Conventions
 
-Follow `PRD.md` §9 exactly. Rules of thumb when adding new code:
+Follow `docs/PRD.md` §9 exactly. Rules of thumb when adding new code:
 
 - Does it need to run without a CLI or browser? → `packages/core/src/<domain-folder>/`
 - Is it a terminal command? → `packages/cli/src/commands/`

@@ -11,6 +11,7 @@ docs/
 ├── README.md                      # Master documentation index (this document)
 │
 ├── 🏛️ Specifications & Protocols
+│   ├── PRD.md                     # Product Requirements Document & Project Specifications
 │   ├── SEP-CCTP.md                # Stellar Ecosystem Proposal: [CCTP] stellar.toml block & forwarder interface
 │   ├── superpowers/specs/         # Circle CCTP Official-Parity Specification for Stellar (Domain 27)
 │   └── LOGIC_PROOF.md             # System architecture, logic specifications, and formal mathematical proofs
@@ -37,6 +38,7 @@ docs/
 
 | Document | Purpose | Audience |
 |---|---|---|
+| [**Product Requirements (PRD)**](./PRD.md) | Canonical scope, requirements, architectural boundaries, and 30-day delivery milestones. | Everyone |
 | [**SEP-CCTP Specification**](./SEP-CCTP.md) | Standard draft submitted to `stellar/stellar-protocol#2031` standardizing the `[CCTP]` `stellar.toml` metadata block and Soroban forwarder contract standard. | Anchor Operators, Protocol Architects |
 | [**Circle CCTP Parity Design**](./superpowers/specs/2026-11-05-circle-cctp-parity-design.md) | Official 62-line normative specification mapping Circle CCTP canonical patterns (EVM/Solana) to Stellar (Domain 27, 6-to-7 decimals, `CctpForwarder` hook encoding). | Core Developers, Protocol Reviewers |
 | [**System Logic & Proofs**](./LOGIC_PROOF.md) | Architectural invariants, decimal scaling math proofs ($10^{-6} \to 10^{-7}$), and state machine definitions. | Security Auditors, System Engineers |
